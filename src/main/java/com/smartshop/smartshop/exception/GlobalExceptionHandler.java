@@ -3,10 +3,7 @@ package com.smartshop.smartshop.exception;
 import com.smartshop.smartshop.exception.User.EmailAlreadyExistsException;
 import com.smartshop.smartshop.exception.User.UserNotFoundException;
 import com.smartshop.smartshop.exception.User.UsernameAlreadyExistsException;
-import com.smartshop.smartshop.exception.generic.AppException;
-import com.smartshop.smartshop.exception.generic.BadRequestException;
-import com.smartshop.smartshop.exception.generic.NotFoundException;
-import com.smartshop.smartshop.exception.generic.UnauthorizedActionException;
+import com.smartshop.smartshop.exception.generic.*;
 import com.smartshop.smartshop.model.dto.ErrorResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
@@ -105,6 +102,18 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
     }
 
+    @ExceptionHandler(ForbiddenException.class)
+    public ResponseEntity<ErrorResponse> handleForbidden(ForbiddenException ex, HttpServletRequest request) {
+        ErrorResponse errorResponse = new ErrorResponse(
+                LocalDateTime.now(),
+                HttpStatus.FORBIDDEN.value(),
+                "Forbidden",
+                ex.getMessage(),
+                request.getRequestURI()
+        );
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(errorResponse);
+    }
+
     @ExceptionHandler(UnauthorizedActionException.class)
     public ResponseEntity<ErrorResponse> handleUnauthorized(UnauthorizedActionException ex, HttpServletRequest request) {
         ErrorResponse errorResponse = new ErrorResponse(
@@ -115,6 +124,18 @@ public class GlobalExceptionHandler {
                 request.getRequestURI()
         );
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(errorResponse);
+    }
+
+    @ExceptionHandler(InvalidCredentialsException.class)
+    public ResponseEntity<ErrorResponse> handleInvalidCredentials(InvalidCredentialsException ex, HttpServletRequest request) {
+        ErrorResponse errorResponse = new ErrorResponse(
+                LocalDateTime.now(),
+                HttpStatus.UNAUTHORIZED.value(),
+                "Unauthorized",
+                ex.getMessage(),
+                request.getRequestURI()
+        );
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse);
     }
 
     @ExceptionHandler(Exception.class)
