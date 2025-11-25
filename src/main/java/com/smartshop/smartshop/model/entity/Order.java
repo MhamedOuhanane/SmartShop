@@ -42,7 +42,7 @@ public class Order extends Auditable{
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private OrderStatus status;
+    private OrderStatus status = OrderStatus.PENDING;
 
     @Column(name = "remaining_amount", precision = 10, scale = 2)
     private BigDecimal remainingAmount;

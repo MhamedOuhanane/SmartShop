@@ -25,7 +25,7 @@ public class Client extends User{
 
     @Enumerated(EnumType.STRING)
     @Column(name = "loyalty_level", nullable = false)
-    private CustomerTier loyaltyLevel;
+    private CustomerTier loyaltyLevel = CustomerTier.BASIC;
 
     @OneToMany(mappedBy = "client")
     private Set<Order> orders = new HashSet<>();

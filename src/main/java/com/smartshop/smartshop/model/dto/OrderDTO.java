@@ -1,6 +1,7 @@
 package com.smartshop.smartshop.model.dto;
 
 import com.smartshop.smartshop.model.enums.OrderStatus;
+import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
 import java.math.BigDecimal;
@@ -15,10 +16,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 public class OrderDTO {
-    private LocalDateTime date = LocalDateTime.now();
-
     private BigDecimal subTotal;
-
     private BigDecimal discount;
 
     private BigDecimal vat;
@@ -31,9 +29,13 @@ public class OrderDTO {
 
     private BigDecimal remainingAmount;
 
+    @NotNull(message = "L'UUID du client est obligatoire")
     private UUID clientUuid;
+
     private String clientName;
-    private Set<OrderItemDTO> orderItems = new HashSet<>();
+
+    @NotNull(message = "La liste des produits est obligatoire")
+    private Set<OrderItemDTO> orderItems;
 
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
