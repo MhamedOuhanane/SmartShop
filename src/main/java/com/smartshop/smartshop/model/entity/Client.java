@@ -5,6 +5,9 @@ import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 
+import java.util.HashSet;
+import java.util.Set;
+
 @Entity
 @Table(name = "clients")
 @Getter
@@ -23,5 +26,9 @@ public class Client extends User{
     @Enumerated(EnumType.STRING)
     @Column(name = "loyalty_level", nullable = false)
     private CustomerTier loyaltyLevel;
+
+    @OneToMany(mappedBy = "client")
+    private Set<Order> orders = new HashSet<>();
+
 
 }
