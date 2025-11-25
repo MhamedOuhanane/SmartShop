@@ -14,13 +14,12 @@ import java.util.Set;
 @SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode(callSuper = true)
 public class ProductDTO {
     private String name;
 
     private BigDecimal price;
 
-    private Integer stock = 0;
+    private Integer stock;
 
     private LocalDateTime deletedAt;
     private LocalDateTime createdAt;

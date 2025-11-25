@@ -14,7 +14,8 @@ import java.util.Set;
 
 @Entity
 @Table(name = "orders")
-@Data
+@Getter
+@Setter
 @SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor

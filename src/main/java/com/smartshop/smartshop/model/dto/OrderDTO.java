@@ -16,13 +16,23 @@ import java.util.UUID;
 @AllArgsConstructor
 public class OrderDTO {
     private LocalDateTime date = LocalDateTime.now();
+
+    private BigDecimal subTotal;
+
+    private BigDecimal discount;
+
+    private BigDecimal vat;
+
+    private BigDecimal total;
+
     private String promoCode;
 
-    private OrderStatus status = OrderStatus.PENDING;
+    private OrderStatus status;
 
     private BigDecimal remainingAmount;
 
     private UUID clientUuid;
+    private String clientName;
     private Set<OrderItemDTO> orderItems = new HashSet<>();
 
     private LocalDateTime createdAt;

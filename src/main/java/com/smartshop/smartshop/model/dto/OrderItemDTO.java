@@ -9,7 +9,6 @@ import java.util.UUID;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@EqualsAndHashCode(callSuper = true)
 public class OrderItemDTO {
     private Integer quantity;
 
