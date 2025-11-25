@@ -2,15 +2,17 @@ package com.smartshop.smartshop.model.entity;
 
 import com.smartshop.smartshop.model.enums.CustomerTier;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
+import lombok.experimental.SuperBuilder;
 
 @Entity
 @Table(name = "clients")
-@Data
+@Getter
+@Setter
+@SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
+@EqualsAndHashCode(callSuper = true)
 public class Client extends User{
     @Column(nullable = false)
     private String name;
