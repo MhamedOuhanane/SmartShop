@@ -18,15 +18,15 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 public class UserDTO {
-    private UUID uuid;
+    protected UUID uuid;
 
     @NotNull(message = "Le nom d'utilisateur est obligatoire")
     @Size(min = 6, max = 50, message = "Le nom d'utilisateur doit être compris entre 6 et 50 caractères")
-    private String username;
+    protected String username;
 
     @NotNull(message = "Le rôle est obligatoire")
-    private UserRole role;
+    protected UserRole role;
 
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
+    protected LocalDateTime createdAt;
+    protected LocalDateTime updatedAt;
 }

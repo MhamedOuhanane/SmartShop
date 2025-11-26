@@ -16,11 +16,11 @@ import lombok.experimental.SuperBuilder;
 public class ClientDTO extends UserDTO {
     @NotNull(message = "Le nom est obligatoire")
     @Size(min = 6, max = 100, message = "Le nom doit avoir entre 6 et 100 caractères")
-    private String name;
+    protected String name;
 
     @NotNull(message = "L'email est obligatoire")
     @Email(message = "Email invalide")
-    private String email;
+    protected String email;
 
-    private CustomerTier loyaltyLevel;
+    protected CustomerTier loyaltyLevel;
 }

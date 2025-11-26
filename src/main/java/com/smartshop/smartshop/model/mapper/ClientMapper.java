@@ -1,5 +1,6 @@
 package com.smartshop.smartshop.model.mapper;
 
+import com.smartshop.smartshop.model.dto.ClientCreateDTO;
 import com.smartshop.smartshop.model.dto.ClientDTO;
 import com.smartshop.smartshop.model.entity.Client;
 import org.mapstruct.Mapper;
@@ -16,4 +17,11 @@ public interface ClientMapper {
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
     Client toEntity(ClientDTO dto);
+
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "uuid", ignore = true)
+    @Mapping(target = "createdAt", ignore = true)
+    @Mapping(target = "updatedAt", ignore = true)
+    @Mapping(target = "orders", ignore = true)
+    Client toEntity(ClientCreateDTO dto);
 }
