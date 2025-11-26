@@ -24,6 +24,11 @@ public class ProductDTO {
     @Positive(message = "Le stock ne peut pas être négatif ou égal a 0")
     private Integer stock;
 
+    @NotNull(message = "Le pourcentage de TVA est obligatoire")
+    @DecimalMin(value = "0.01", inclusive = true, message = "Le pourcentage de TVA doit être supérieur à 0")
+    @DecimalMax(value = "1", inclusive = true, message = "Le pourcentage de TVA ne peut pas dépasser 1")
+    private BigDecimal prcTVA;
+
     private LocalDateTime deletedAt;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;

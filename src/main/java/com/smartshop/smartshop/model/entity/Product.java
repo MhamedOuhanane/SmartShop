@@ -30,6 +30,10 @@ public class Product extends Auditable{
     @Column(nullable = false, columnDefinition = "INT DEFAULT 0")
     private Integer stock = 0;
 
+    @Builder.Default
+    @Column(nullable = false, precision = 5, scale = 2)
+    private BigDecimal prcTVA = BigDecimal.valueOf(.01);
+
     @Column(name = "deleted_at")
     private LocalDateTime deletedAt;
 

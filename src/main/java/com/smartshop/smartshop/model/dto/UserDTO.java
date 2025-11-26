@@ -24,7 +24,7 @@ public class UserDTO {
     @Size(min = 6, max = 50, message = "Le nom d'utilisateur doit être compris entre 6 et 50 caractères")
     protected String username;
 
-    @NotNull(message = "Le rôle est obligatoire")
+//    @NotNull(message = "Le rôle est obligatoire")
     protected UserRole role;
 
     protected LocalDateTime createdAt;

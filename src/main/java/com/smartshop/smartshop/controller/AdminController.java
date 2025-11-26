@@ -19,6 +19,31 @@ import java.util.UUID;
 public class AdminController {
     private final ClientService clientService;
 
+    @PostMapping("/clients")
+    public ResponseEntity<?> createClient(
+            @Valid @RequestBody ClientCreateDTO dto,
+            HttpServletRequest req
+    ) {
+        var result = clientService.create(dto);
+        result.setPath(req.getRequestURI());
+
+        return ResponseEntity.status((int) result.getStatus()).body(result);
+    }
+
+    @PutMapping("/clients/{uuid}")
+    public ResponseEntity<?> updateClient(
+            @PathVariable UUID uuid,
+            @Valid @RequestBody ClientDTO dto,
+            HttpServletRequest req
+    ) {
+        var result = clientService.update(uuid, dto);
+        result.setPath(req.getRequestURI());
+
+        return ResponseEntity.status((int) result.getStatus()).body(result);
+    }
+
+
+
     @GetMapping("/clients")
     public ResponseEntity<?> showsClient(
             @RequestParam(value = "page", defaultValue = "0") Integer page,

@@ -16,6 +16,7 @@ public interface ClientMapper {
     @Mapping(target = "orders", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
+    @Mapping(target = "role", ignore = true)
     Client toEntity(ClientDTO dto);
 
     @Mapping(target = "id", ignore = true)
@@ -23,5 +24,6 @@ public interface ClientMapper {
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
     @Mapping(target = "orders", ignore = true)
+    @Mapping(target = "role", ignore = true)
     Client toEntity(ClientCreateDTO dto);
 }
