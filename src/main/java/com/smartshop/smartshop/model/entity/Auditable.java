@@ -10,9 +10,9 @@ import java.util.UUID;
 @MappedSuperclass
 @Getter
 @Setter
+@SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
-@SuperBuilder
 public class Auditable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

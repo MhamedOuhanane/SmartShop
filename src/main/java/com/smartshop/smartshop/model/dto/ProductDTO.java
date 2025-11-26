@@ -1,18 +1,15 @@
 package com.smartshop.smartshop.model.dto;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.OneToMany;
+
 import jakarta.validation.constraints.*;
 import lombok.*;
-import lombok.experimental.SuperBuilder;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.Set;
 
 @Getter
 @Setter
-@SuperBuilder
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class ProductDTO {

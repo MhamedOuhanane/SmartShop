@@ -23,10 +23,12 @@ public class Client extends User{
     @Column(nullable = false, unique = true)
     private String email;
 
+    @Builder.Default
     @Enumerated(EnumType.STRING)
     @Column(name = "loyalty_level", nullable = false)
     private CustomerTier loyaltyLevel = CustomerTier.BASIC;
 
+    @Builder.Default
     @OneToMany(mappedBy = "client")
     private Set<Order> orders = new HashSet<>();
 

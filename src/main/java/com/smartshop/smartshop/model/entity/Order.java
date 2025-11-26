@@ -40,6 +40,7 @@ public class Order extends Auditable{
     @Column(name = "promo_code")
     private String promoCode;
 
+    @Builder.Default
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private OrderStatus status = OrderStatus.PENDING;
@@ -47,9 +48,11 @@ public class Order extends Auditable{
     @Column(name = "remaining_amount", precision = 10, scale = 2)
     private BigDecimal remainingAmount;
 
+    @Builder.Default
     @OneToMany(mappedBy = "order")
     private Set<OrderItem> orderItems = new HashSet<>();
 
+    @Builder.Default
     @OneToMany(mappedBy = "order")
     private Set<Payment> payments = new HashSet<>();
 

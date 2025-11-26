@@ -2,7 +2,6 @@ package com.smartshop.smartshop.model.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-import lombok.experimental.SuperBuilder;
 
 import java.math.BigDecimal;
 
@@ -10,10 +9,10 @@ import java.math.BigDecimal;
 @Table(name = "order_item")
 @Getter
 @Setter
-@SuperBuilder
+@Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@EqualsAndHashCode(callSuper = true)
+@EqualsAndHashCode
 public class OrderItem {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -11,5 +11,10 @@ public interface PaymentMapper {
     @Mapping(source = "order.uuid", target = "orderUuid")
     PaymentDTO toDto(Payment payment);
 
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "uuid", ignore = true)
+    @Mapping(target = "order", ignore = true)
+    @Mapping(target = "createdAt", ignore = true)
+    @Mapping(target = "updatedAt", ignore = true)
     Payment toEntity(PaymentDTO dto);
 }

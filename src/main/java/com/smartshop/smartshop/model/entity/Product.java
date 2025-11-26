@@ -26,6 +26,7 @@ public class Product extends Auditable{
     @Column(nullable = false, precision = 10, scale = 2)
     private BigDecimal price;
 
+    @Builder.Default
     @Column(nullable = false, columnDefinition = "INT DEFAULT 0")
     private Integer stock = 0;
 
