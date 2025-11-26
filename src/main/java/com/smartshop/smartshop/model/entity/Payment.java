@@ -40,7 +40,7 @@ public class Payment extends Auditable {
     @Column(nullable = false)
     private PaymentStatus status = PaymentStatus.PENDING;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "order_id")
     private Order order;
 }

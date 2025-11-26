@@ -5,11 +5,15 @@ import com.smartshop.smartshop.exception.User.UsernameAlreadyExistsException;
 import com.smartshop.smartshop.exception.generic.BadRequestException;
 import com.smartshop.smartshop.exception.generic.NotFoundException;
 import com.smartshop.smartshop.model.dto.ApiResponse;
+import com.smartshop.smartshop.model.dto.ClientCreateDTO;
 import com.smartshop.smartshop.model.dto.ClientDTO;
 import com.smartshop.smartshop.model.dto.PaginationDTO;
 import com.smartshop.smartshop.model.entity.Client;
+import com.smartshop.smartshop.model.enums.CustomerTier;
+import com.smartshop.smartshop.model.enums.UserRole;
 import com.smartshop.smartshop.model.mapper.ClientMapper;
 import com.smartshop.smartshop.repository.ClientRepository;
+import com.smartshop.smartshop.repository.UserRepository;
 import com.smartshop.smartshop.service.interfaces.ClientService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -26,19 +30,22 @@ import java.util.UUID;
 public class ClientServiceImpl implements ClientService {
     private final ClientRepository repository;
     private final ClientMapper mapper;
+    private final UserRepository userRepository;
 
     @Override
-    public ApiResponse<ClientDTO> create(ClientDTO dto) {
+    public ApiResponse<ClientDTO> create(ClientCreateDTO dto) {
         if (dto == null)
             throw new BadRequestException("Les informations du client ne peuvent pas être vides");
 
         if (repository.findByEmail(dto.getEmail()).isPresent())
                 throw new EmailAlreadyExistsException("Un Client avec l'email '" + dto.getEmail() + "' existe déjà.");
 
-        if (repository.findByUsername(dto.getUsername()).isPresent())
+        if (userRepository.findByUsername(dto.getUsername()).isPresent())
                 throw new UsernameAlreadyExistsException("Un Client avec Username '" + dto.getUsername() + "' existe déjà.");
 
         Client client = mapper.toEntity(dto);
+        client.setLoyaltyLevel(CustomerTier.BASIC);
+        client.setRole(UserRole.CLIENT);
         client = repository.save(client);
 
         return new ApiResponse<>(
@@ -71,7 +78,7 @@ public class ClientServiceImpl implements ClientService {
         }
 
         if (!client.getUsername().equals(dto.getUsername())) {
-            if (repository.findByUsername(dto.getUsername()).isPresent())
+            if (userRepository.findByUsername(dto.getUsername()).isPresent())
                 throw new UsernameAlreadyExistsException("Un Client avec Username '" + dto.getUsername() + "' existe déjà.");
             client.setUsername(dto.getUsername());
             updated = true;
