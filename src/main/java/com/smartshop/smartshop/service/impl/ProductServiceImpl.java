@@ -50,7 +50,6 @@ public class ProductServiceImpl implements ProductService {
         }
 
         product = repository.save(product);
-
         return new ApiResponse<>(
                 LocalDateTime.now(),
                 message,
@@ -117,7 +116,7 @@ public class ProductServiceImpl implements ProductService {
         size = size == null ? 5 : size;
 
         Pageable pageable = PageRequest.of(page, size, Sort.by("name").ascending());
-        Page<Product> products = repository.findAll(pageable);
+        Page<Product> products = repository.findAllProduct(pageable);
 
         String message = "Aucun produit n'existe dans le système";
         List<ProductDTO> data = List.of();
@@ -175,14 +174,13 @@ public class ProductServiceImpl implements ProductService {
                 .orElseThrow(() -> new NotFoundException("Aucun produit trouvé avec cet identifiant : " + uuid));
 
         product.setDeletedAt(LocalDateTime.now());
-        product = repository.save(product);
-        repository.delete(product);
+        repository.save(product);
 
         return new ApiResponse<>(
                 LocalDateTime.now(),
                 "Produit '" + product.getName() + "' supprimé avec succès (soft delete)",
                 200,
-                mapper.toDto(product),
+                null,
                 null,
                 null
         );
@@ -198,14 +196,12 @@ public class ProductServiceImpl implements ProductService {
 
         product.setDeletedAt(null);
         repository.restoreDeleted(uuid);
-        product = repository.findByUuid(uuid)
-                .orElseThrow(() -> new NotFoundException("Aucun produit trouvé avec cet identifiant : " + uuid));
 
         return new ApiResponse<>(
                 LocalDateTime.now(),
                 "Produit '" + product.getName() + "' restauré avec succès",
                 200,
-                mapper.toDto(product),
+                null,
                 null,
                 null
         );

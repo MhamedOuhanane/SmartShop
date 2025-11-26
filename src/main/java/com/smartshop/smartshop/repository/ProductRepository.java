@@ -13,16 +13,21 @@ import java.util.UUID;
 
 public interface ProductRepository extends JpaRepository<Product, UUID> {
     Optional<Product> findByName(String name);
+
+    @Query("Select p From Product p Where p.uuid = :uuid And p.deletedAt Is Null")
     Optional<Product> findByUuid(UUID uuid);
 
-    @Query("Select p From Product p Where p.uuid = :uuid And p.deleted = true")
+    @Query("Select p From Product p Where p.deletedAt Is Null")
+    Page<Product> findAllProduct(Pageable pageable);
+
+    @Query("Select p From Product p Where p.uuid = :uuid And p.deletedAt Is Not Null")
     Optional<Product> findDeletedByUuid(@Param("uuid") UUID uuid);
 
-    @Query("Select p From Product p Where p.deleted = true")
+    @Query("Select p From Product p Where p.deletedAt Is Not Null")
     Page<Product> findAllDeleted(Pageable pageable);
 
     @Modifying
-    @Query("Update p From Product p Set p.deleted = true Where p.uuid = :uuid")
+    @Query("Update Product p Set p.deletedAt = Null Where p.uuid = :uuid")
     void restoreDeleted(@Param("uuid") UUID uuid);
 
 }

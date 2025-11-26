@@ -11,7 +11,6 @@ import java.util.Set;
 
 @Entity
 @Table(name = "products")
-@SoftDelete(columnName = "deleted")
 @Getter
 @Setter
 @SuperBuilder
@@ -25,9 +24,8 @@ public class Product extends Auditable{
     @Column(nullable = false, precision = 10, scale = 2)
     private BigDecimal price;
 
-    @Builder.Default
-    @Column(nullable = false, columnDefinition = "INT DEFAULT 0")
-    private Integer stock = 0;
+    @Column(nullable = false)
+    private Integer stock;
 
     @Builder.Default
     @Column(nullable = false, precision = 5, scale = 2)

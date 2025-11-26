@@ -16,6 +16,8 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 public class OrderDTO {
+    protected UUID uuid;
+
     private BigDecimal subTotal;
     private BigDecimal discount;
 

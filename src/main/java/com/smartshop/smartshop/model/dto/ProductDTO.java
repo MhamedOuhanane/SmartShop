@@ -6,6 +6,7 @@ import lombok.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Getter
 @Setter
@@ -13,6 +14,8 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ProductDTO {
+    protected UUID uuid;
+
     @NotNull(message = "Le nom du produit est obligatoire")
     @Size(min = 4, max = 100, message = "Le nom du produit doit avoir entre 2 et 100 caractères")
     private String name;
@@ -21,6 +24,7 @@ public class ProductDTO {
     @DecimalMin(value = "0.0", inclusive = false, message = "Le prix doit être supérieur à 0")
     private BigDecimal price;
 
+    @NotNull(message = "Le stock est obligatoire")
     @Positive(message = "Le stock ne peut pas être négatif ou égal a 0")
     private Integer stock;
 

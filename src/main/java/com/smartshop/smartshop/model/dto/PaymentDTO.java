@@ -16,6 +16,8 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 public class PaymentDTO {
+    protected UUID uuid;
+
     private Integer paymentNumber;
 
     @NotNull(message = "Le montant est obligatoire")
