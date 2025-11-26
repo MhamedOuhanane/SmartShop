@@ -11,6 +11,7 @@ import com.smartshop.smartshop.model.enums.UserRole;
 import com.smartshop.smartshop.model.mapper.ProductMapper;
 import com.smartshop.smartshop.repository.ProductRepository;
 import com.smartshop.smartshop.service.interfaces.ProductService;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -25,6 +26,7 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class ProductServiceImpl implements ProductService {
     private final ProductRepository repository;
     private final ProductMapper mapper;
@@ -110,14 +112,12 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public ApiResponse<List<ProductDTO>> findAll(Integer page, Integer size, UserRole role) {
+    public ApiResponse<List<ProductDTO>> findAll(Integer page, Integer size) {
         page = page == null ? 0 : page;
         size = size == null ? 5 : size;
 
         Pageable pageable = PageRequest.of(page, size, Sort.by("name").ascending());
-        Page<Product> products = role.equals(UserRole.ADMIN)
-                ? repository.findAll(pageable)
-                : repository.findByDeletedAtIsNull(pageable);
+        Page<Product> products = repository.findAll(pageable);
 
         String message = "Aucun produit n'existe dans le système";
         List<ProductDTO> data = List.of();
@@ -165,28 +165,21 @@ public class ProductServiceImpl implements ProductService {
                 null
         );
     }
-
     @Override
     public ApiResponse<ProductDTO> softDelete(UUID uuid) {
         if (uuid == null)
-            throw new BadRequestException("UUID du produit ne peuvent pas être vides");
+            throw new BadRequestException("L'identifiant (UUID) du produit est obligatoire.");
 
         Product product = repository.findByUuid(uuid)
-                .orElseThrow(() -> new NotFoundException("Aucun clent trouvé avec cet identifiant"));
+                .orElseThrow(() -> new NotFoundException("Aucun produit trouvé avec cet identifiant : " + uuid));
 
-        boolean isDeleted = product.getDeletedAt() == null;
-        LocalDateTime deletedAt = isDeleted ? LocalDateTime.now() : null;
-
-        product.setDeletedAt(deletedAt);
-        repository.save(product);
-
-        String message = isDeleted
-                ? "Produit '" + product.getName() + "' supprimé avec succès (soft delete)"
-                : "Produit '" + product.getName() + "' restauré avec succès";
+        product.setDeletedAt(LocalDateTime.now());
+        product = repository.save(product);
+        repository.delete(product);
 
         return new ApiResponse<>(
                 LocalDateTime.now(),
-                message,
+                "Produit '" + product.getName() + "' supprimé avec succès (soft delete)",
                 200,
                 mapper.toDto(product),
                 null,

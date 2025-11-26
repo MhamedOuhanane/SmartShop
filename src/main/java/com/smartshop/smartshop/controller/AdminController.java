@@ -46,8 +46,8 @@ public class AdminController {
 
     @GetMapping("/clients")
     public ResponseEntity<?> showsClient(
-            @RequestParam(value = "page", defaultValue = "0") Integer page,
-            @RequestParam(value = "size", defaultValue = "5") Integer size,
+            @RequestParam(defaultValue = "0") Integer page,
+            @RequestParam(defaultValue = "5") Integer size,
             HttpServletRequest req
     ) {
         var result = clientService.findAll(page, size);

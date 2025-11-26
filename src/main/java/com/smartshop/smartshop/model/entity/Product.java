@@ -3,6 +3,7 @@ package com.smartshop.smartshop.model.entity;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
+import org.hibernate.annotations.SoftDelete;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -10,6 +11,7 @@ import java.util.Set;
 
 @Entity
 @Table(name = "products")
+@SoftDelete(columnName = "deleted")
 @Getter
 @Setter
 @SuperBuilder
