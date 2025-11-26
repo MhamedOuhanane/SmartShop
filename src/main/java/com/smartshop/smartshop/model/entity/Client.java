@@ -29,7 +29,7 @@ public class Client extends User{
     private CustomerTier loyaltyLevel = CustomerTier.BASIC;
 
     @Builder.Default
-    @OneToMany(mappedBy = "client")
+    @OneToMany(mappedBy = "client", fetch = FetchType.LAZY)
     private Set<Order> orders = new HashSet<>();
 
 

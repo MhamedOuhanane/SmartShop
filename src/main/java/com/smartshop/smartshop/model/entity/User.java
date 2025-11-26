@@ -17,14 +17,14 @@ import org.springframework.security.crypto.bcrypt.BCrypt;
 @Inheritance(strategy = InheritanceType.JOINED)
 public class User extends Auditable{
     @Column(nullable = false, unique = true)
-    private String username;
+    protected String username;
 
     @Column(nullable = false)
-    private String password;
+    protected String password;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private UserRole role;
+    protected UserRole role;
 
     public void setPassword(String password) {
         this.password = BCrypt.hashpw(password, BCrypt.gensalt());

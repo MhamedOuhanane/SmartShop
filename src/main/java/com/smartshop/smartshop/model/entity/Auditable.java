@@ -16,10 +16,10 @@ import java.util.UUID;
 public class Auditable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    protected Long id;
 
     @Column(columnDefinition = "uuid", nullable = false, updatable = false, unique = true)
-    private UUID uuid;
+    protected UUID uuid;
 
     @Column(name = "created_at", nullable = false)
     protected LocalDateTime createdAt;
