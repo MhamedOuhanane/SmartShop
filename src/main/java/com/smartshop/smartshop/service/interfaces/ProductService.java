@@ -12,4 +12,7 @@ public interface ProductService {
     ApiResponse<List<ProductDTO>> findAll(Integer page, Integer size);
     ApiResponse<ProductDTO> find(UUID uuid);
     ApiResponse<ProductDTO> softDelete(UUID uuid);
+    ApiResponse<ProductDTO> restore(UUID uuid);
+    ApiResponse<List<ProductDTO>> findAllDeleted(Integer page, Integer size);
+    ApiResponse<ProductDTO> findDeleted(UUID uuid);
 }

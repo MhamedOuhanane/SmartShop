@@ -165,6 +165,7 @@ public class ProductServiceImpl implements ProductService {
                 null
         );
     }
+
     @Override
     public ApiResponse<ProductDTO> softDelete(UUID uuid) {
         if (uuid == null)
@@ -180,6 +181,84 @@ public class ProductServiceImpl implements ProductService {
         return new ApiResponse<>(
                 LocalDateTime.now(),
                 "Produit '" + product.getName() + "' supprimé avec succès (soft delete)",
+                200,
+                mapper.toDto(product),
+                null,
+                null
+        );
+    }
+
+    @Override
+    public ApiResponse<ProductDTO> restore(UUID uuid) {
+        if (uuid == null)
+            throw new BadRequestException("L'identifiant (UUID) du produit est obligatoire.");
+
+        Product product = repository.findDeletedByUuid(uuid)
+                .orElseThrow(() -> new NotFoundException("Aucun produit soft deleted trouvé avec cet identifiant : " + uuid));
+
+        product.setDeletedAt(null);
+        repository.restoreDeleted(uuid);
+        product = repository.findByUuid(uuid)
+                .orElseThrow(() -> new NotFoundException("Aucun produit trouvé avec cet identifiant : " + uuid));
+
+        return new ApiResponse<>(
+                LocalDateTime.now(),
+                "Produit '" + product.getName() + "' restauré avec succès",
+                200,
+                mapper.toDto(product),
+                null,
+                null
+        );
+    }
+
+    @Override
+    public ApiResponse<List<ProductDTO>> findAllDeleted(Integer page, Integer size) {
+        page = page == null ? 0 : page;
+        size = size == null ? 5 : size;
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by("name").ascending());
+        Page<Product> products = repository.findAllDeleted(pageable);
+
+        String message = "Aucun produit soft deleted n'existe dans le système";
+        List<ProductDTO> data = List.of();
+
+        if (!products.getContent().isEmpty()) {
+            message = "Les produits soft deleted trouvés avec succès";
+            data = products.stream()
+                    .map(mapper::toDto)
+                    .toList();
+        }
+
+        PaginationDTO pagination = new PaginationDTO(
+                products.getNumber(),
+                products.getSize(),
+                products.getTotalElements(),
+                products.getTotalPages(),
+                products.isFirst(),
+                products.isLast()
+        );
+
+        return new ApiResponse<>(
+                LocalDateTime.now(),
+                message,
+                200,
+                data,
+                null,
+                pagination
+        );
+    }
+
+    @Override
+    public ApiResponse<ProductDTO> findDeleted(UUID uuid) {
+        if (uuid == null)
+            throw new BadRequestException("UUID du produit ne peuvent pas être vides");
+
+        Product product = repository.findDeletedByUuid(uuid)
+                .orElseThrow(() -> new NotFoundException("Aucun produit soft deleted trouvé avec cet identifiant : " + uuid));
+
+        return new ApiResponse<>(
+                LocalDateTime.now(),
+                "Le produit soft deleted trouvés avec succès",
                 200,
                 mapper.toDto(product),
                 null,
