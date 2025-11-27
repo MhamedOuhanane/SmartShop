@@ -49,7 +49,7 @@ public class Order extends Auditable{
     private BigDecimal remainingAmount;
 
     @Builder.Default
-    @OneToMany(mappedBy = "order")
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
     private Set<OrderItem> orderItems = new HashSet<>();
 
     @Builder.Default

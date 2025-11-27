@@ -66,7 +66,7 @@ public class ClientServiceImpl implements ClientService {
             throw new BadRequestException("UUID du client ne peuvent pas être vides");
 
         Client client = repository.findByUuid(uuid)
-                .orElseThrow(() -> new NotFoundException("Aucun clent trouvé avec cet identifiant"));
+                .orElseThrow(() -> new NotFoundException("Aucun client trouvé avec cet identifiant"));
 
         boolean updated = false;
 
@@ -146,7 +146,7 @@ public class ClientServiceImpl implements ClientService {
             throw new BadRequestException("UUID du client ne peuvent pas être vides");
 
         Client client = repository.findByUuid(uuid)
-                .orElseThrow(() -> new NotFoundException("Aucun clent trouvé avec cet identifiant"));
+                .orElseThrow(() -> new NotFoundException("Aucun client trouvé avec cet identifiant"));
 
         return new ApiResponse<>(
                 LocalDateTime.now(),
