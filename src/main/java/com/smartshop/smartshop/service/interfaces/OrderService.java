@@ -13,5 +13,5 @@ public interface OrderService {
     ApiResponse<List<OrderDTO>> findAll(Integer page, Integer size);
     ApiResponse<OrderDTO> find(UUID uuid);
     ApiResponse<List<OrderDTO>> findClientOrders(UUID uuid, Integer page, Integer size);
-    ApiResponse<OrderDTO> findClientStatistics(UUID uuid);
+    ApiResponse<?> findClientStatistics(UUID uuid);
 }

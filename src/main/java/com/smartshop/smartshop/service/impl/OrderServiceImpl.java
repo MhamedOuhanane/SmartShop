@@ -149,7 +149,7 @@ public class OrderServiceImpl implements OrderService {
             throw new BadRequestException("UUID du commande ne peuvent pas être vides");
 
         Order order = repository.findByUuid(uuid)
-                .orElseThrow(() -> new NotFoundException(String.format("Aucun commande trouvé avec identifiant '%s'", uuid.toString())));
+                .orElseThrow(() -> new NotFoundException("Aucun commande trouvé avec identifiant " + uuid));
 
         return new ApiResponse<>(
                 LocalDateTime.now(),
@@ -163,12 +163,85 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public ApiResponse<List<OrderDTO>> findClientOrders(UUID uuid, Integer page, Integer size) {
-        return null;
+        if (uuid == null)
+            throw new BadRequestException("UUID du client ne peuvent pas être vides");
+
+        Client client = clientRepository.findByUuid(uuid)
+                .orElseThrow(() -> new NotFoundException("Aucun client trouvé avec cet identifiant"));
+
+        page = page == null ? 0 : page;
+        size = size == null ? 5 : size;
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").ascending());
+        Page<Order> payments = repository.findByClient(client, pageable);
+
+        String message = "Aucun commande n'existe!";
+        List<OrderDTO> data = List.of();
+
+        if (!payments.getContent().isEmpty()) {
+            message = "Les commandes trouvés avec succès!";
+            data = payments.stream()
+                    .map(mapper::toDto)
+                    .toList();
+        }
+
+        PaginationDTO pagination = new PaginationDTO(
+                payments.getNumber(),
+                payments.getSize(),
+                payments.getTotalElements(),
+                payments.getTotalPages(),
+                payments.isFirst(),
+                payments.isLast()
+        );
+
+        return new ApiResponse<>(
+                LocalDateTime.now(),
+                message,
+                200,
+                data,
+                null,
+                pagination
+        );
     }
 
     @Override
-    public ApiResponse<OrderDTO> findClientStatistics(UUID uuid) {
-        return null;
+    public ApiResponse<?> findClientStatistics(UUID uuid) {
+        if (uuid == null)
+            throw new BadRequestException("UUID du client ne peuvent pas être vides");
+
+        Client client = clientRepository.findByUuid(uuid)
+                .orElseThrow(() -> new NotFoundException("Aucun client trouvé avec cet identifiant"));
+
+        Set<Order> orders = repository.findAllByClient(client);
+
+        int count = orders.size();
+        BigDecimal total = orders.stream()
+                .map(Order::getSubTotal)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        LocalDateTime first = orders.stream()
+                .map(Order::getDate)
+                .min(LocalDateTime::compareTo)
+                .orElse(null);
+        LocalDateTime last = orders.stream()
+                .map(Order::getDate)
+                .max(LocalDateTime::compareTo)
+                .orElse(null);
+
+        Map<String, Object> stats = Map.of(
+                "totalOrders", count,
+                "totalAmount", total,
+                "firstOrderDate", first,
+                "lastOrderDate", last
+        );
+
+        return new ApiResponse<>(
+                LocalDateTime.now(),
+                "Statistiques des commandes clients " + client.getName(),
+                200,
+                stats,
+                null,
+                null
+        );
     }
 
     private Set<OrderItem> buildOrderItem(Order order, Set<OrderItemDTO> itemsDto) {
