@@ -2,22 +2,21 @@ package com.smartshop.smartshop.service.impl;
 
 import com.smartshop.smartshop.exception.generic.BadRequestException;
 import com.smartshop.smartshop.exception.generic.NotFoundException;
-import com.smartshop.smartshop.model.dto.ApiResponse;
-import com.smartshop.smartshop.model.dto.OrderDTO;
-import com.smartshop.smartshop.model.dto.OrderItemDTO;
-import com.smartshop.smartshop.model.dto.ProductDTO;
+import com.smartshop.smartshop.model.dto.*;
 import com.smartshop.smartshop.model.entity.*;
 import com.smartshop.smartshop.model.enums.CustomerTier;
 import com.smartshop.smartshop.model.enums.OrderStatus;
-import com.smartshop.smartshop.model.enums.PaymentStatus;
 import com.smartshop.smartshop.model.mapper.OrderMapper;
 import com.smartshop.smartshop.repository.ClientRepository;
 import com.smartshop.smartshop.repository.OrderRepository;
-import com.smartshop.smartshop.repository.PaymentRepository;
 import com.smartshop.smartshop.repository.ProductRepository;
 import com.smartshop.smartshop.service.interfaces.OrderService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -109,12 +108,57 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public ApiResponse<List<OrderDTO>> findAll(Integer page, Integer size) {
-        return null;
+        page = page == null ? 0 : page;
+        size = size == null ? 5 : size;
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").ascending());
+        Page<Order> payments = repository.findAll(pageable);
+
+        String message = "Aucun commande n'existe dans le système";
+        List<OrderDTO> data = List.of();
+
+        if (!payments.getContent().isEmpty()) {
+            message = "Les commandes trouvés avec succès";
+            data = payments.stream()
+                    .map(mapper::toDto)
+                    .toList();
+        }
+
+        PaginationDTO pagination = new PaginationDTO(
+                payments.getNumber(),
+                payments.getSize(),
+                payments.getTotalElements(),
+                payments.getTotalPages(),
+                payments.isFirst(),
+                payments.isLast()
+        );
+
+        return new ApiResponse<>(
+                LocalDateTime.now(),
+                message,
+                200,
+                data,
+                null,
+                pagination
+        );
     }
 
     @Override
     public ApiResponse<OrderDTO> find(UUID uuid) {
-        return null;
+        if (uuid == null)
+            throw new BadRequestException("UUID du commande ne peuvent pas être vides");
+
+        Order order = repository.findByUuid(uuid)
+                .orElseThrow(() -> new NotFoundException(String.format("Aucun commande trouvé avec identifiant '%s'", uuid.toString())));
+
+        return new ApiResponse<>(
+                LocalDateTime.now(),
+                "Le order trouvés avec succès",
+                200,
+                mapper.toDto(order),
+                null,
+                null
+        );
     }
 
     @Override

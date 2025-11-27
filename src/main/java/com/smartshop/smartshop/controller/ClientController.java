@@ -1,15 +1,12 @@
 package com.smartshop.smartshop.controller;
 
-import com.smartshop.smartshop.model.dto.ClientDTO;
 import com.smartshop.smartshop.model.enums.UserRole;
 import com.smartshop.smartshop.service.interfaces.ClientService;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Map;
 import java.util.UUID;
 
 @RestController
