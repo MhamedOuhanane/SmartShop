@@ -2,6 +2,7 @@ package com.smartshop.smartshop.repository;
 
 import com.smartshop.smartshop.model.entity.Client;
 import com.smartshop.smartshop.model.entity.Order;
+import com.smartshop.smartshop.model.entity.Product;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -15,4 +16,5 @@ public interface OrderRepository extends JpaRepository<Order, UUID> {
     Optional<Order> findByUuid(UUID uuid);
     Page<Order> findByClient(Client client, Pageable pageable);
     Set<Order> findAllByClient(Client client);
+    Set<Product> findByUuidIn(Set<UUID> uuids);
 }

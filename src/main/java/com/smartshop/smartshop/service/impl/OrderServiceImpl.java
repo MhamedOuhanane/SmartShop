@@ -22,6 +22,7 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -42,11 +43,19 @@ public class OrderServiceImpl implements OrderService {
         Client client = clientRepository.findByUuid(dto.getClientUuid())
                 .orElseThrow(() -> new NotFoundException("Aucun client trouvé avec cet identifiant"));
 
+        var products = loadProducts(dto.getOrderItems());
+
+        var validatedStock = validStock(dto.getOrderItems(), products);
+        boolean insufficientStock = (boolean) validatedStock.get("insufficientStock");
+        OrderStatus status = insufficientStock
+                ? OrderStatus.REJECTED
+                : OrderStatus.PENDING;
+
         Order order = mapper.toEntity(dto);
         order.setClient(client);
-        order.setStatus(OrderStatus.PENDING);
+        order.setStatus(status);
 
-        Set<OrderItem> items = buildOrderItem(order, dto.getOrderItems());
+        Set<OrderItem> items = buildOrderItem(order, dto.getOrderItems(), products);
         BigDecimal subTotal = calculSubTotal(items);
 
         order.setOrderItems(items);
@@ -58,13 +67,12 @@ public class OrderServiceImpl implements OrderService {
         order.setRemainingAmount(order.getTotal());
 
         order = repository.save(order);
-        Set<Product> products = updateStock(order.getOrderItems(), OrderStatus.PENDING);
-        productRepository.saveAll(products);
+        if (status == OrderStatus.PENDING) {
+            Set<Product> productsUpdate = updateStock(order.getOrderItems(), OrderStatus.PENDING);
+            productRepository.saveAll(productsUpdate);
+        }
 
-        String message = String.format(
-                "Commande pour le client '%s' créée avec succès. Nombre d'articles : %d, Montant total : %.2f MAD.",
-                client.getName(), items.size(), order.getTotal()
-        );
+        String message = (String) validatedStock.get("message");
 
         return new ApiResponse<>(
                 LocalDateTime.now(),
@@ -94,7 +102,8 @@ public class OrderServiceImpl implements OrderService {
         if (newStatus.equals(OrderStatus.CANCELED)) {
             Set<Product> products = updateStock(order.getOrderItems(), newStatus);
             productRepository.saveAll(products);
-        }
+        } else if (newStatus.equals(OrderStatus.CONFIRMED))
+            handleLoyaltyLevelClient(order);
 
         return new ApiResponse<>(
                 LocalDateTime.now(),
@@ -244,31 +253,41 @@ public class OrderServiceImpl implements OrderService {
         );
     }
 
-    private Set<OrderItem> buildOrderItem(Order order, Set<OrderItemDTO> itemsDto) {
-        Set<OrderItem> items = new HashSet<>();
+    private Map<UUID, Product> loadProducts(Set<OrderItemDTO> itemsDto) {
+        Set<UUID> uuids = itemsDto.stream()
+                .map(OrderItemDTO::getProductUuid)
+                .collect(Collectors.toSet());
+        Set<Product> products = repository.findByUuidIn(uuids);
 
-        for (OrderItemDTO itemDto : itemsDto) {
-            Product product = productRepository.findByUuid(itemDto.getProductUuid())
-                    .orElseThrow(() -> new NotFoundException("Produit non trouvé : " + itemDto.getProductUuid()));
+        if (products.size() != uuids.size()) {
+            List<UUID> foundUuids = products.stream()
+                    .map(Product::getUuid)
+                    .toList();
 
-            if (product.getStock().compareTo(itemDto.getQuantity()) < 0)
-                throw new BadRequestException(
-                        "La quantité demandée (" + itemDto.getQuantity() +
-                                ") dépasse le stock disponible (" + product.getStock() + ") pour le produit : "
-                                + product.getName()
-                );
+            List<UUID> missingUuids = uuids.stream()
+                    .filter(uuid -> !foundUuids.contains(uuid))
+                    .toList();
 
-            OrderItem item = OrderItem.builder()
+            throw new NotFoundException(
+                    "Produits introuvables pour les UUID : " + missingUuids
+            );
+        }
+
+        return products.stream()
+                .collect(Collectors.toMap(Product::getUuid, p -> p));
+    }
+
+    private Set<OrderItem> buildOrderItem(Order order, Set<OrderItemDTO> itemsDto, Map<UUID, Product> products) {
+        return itemsDto.stream().map( dto -> {
+            Product product = products.get(dto.getProductUuid());
+            return OrderItem.builder()
                     .order(order)
                     .product(product)
-                    .quantity(itemDto.getQuantity())
+                    .quantity(dto.getQuantity())
                     .unitPrice(product.getPrice())
-                    .totalLine(product.getPrice().multiply(BigDecimal.valueOf(itemDto.getQuantity())))
+                    .totalLine(product.getPrice().multiply(BigDecimal.valueOf(dto.getQuantity())))
                     .build();
-
-            items.add(item);
-        }
-        return items;
+        }).collect(Collectors.toSet());
     }
 
     private BigDecimal calculateVAT(Set<OrderItem> items) {
@@ -310,7 +329,7 @@ public class OrderServiceImpl implements OrderService {
         );
 
         var entry = rules.get(client.getLoyaltyLevel()).floorEntry(subTotal);
-        return entry == null ? BigDecimal.ZERO : entry.getKey();
+        return entry == null ? BigDecimal.ZERO : entry.getValue();
     }
 
     private BigDecimal bd(double d) {
@@ -342,6 +361,31 @@ public class OrderServiceImpl implements OrderService {
             products.add(product);
         }
         return products;
+    }
+
+    private void handleLoyaltyLevelClient(Order confirmedOrder) {
+        Client client = confirmedOrder.getClient();
+        Set<Order> orders = repository.findAllByClient(client).stream()
+                .filter(o -> o.getStatus() == OrderStatus.CONFIRMED)
+                .collect(Collectors.toSet());
+        orders.add(confirmedOrder);
+
+        int orderCount = orders.size();
+        BigDecimal totalAmount = orders.stream()
+                .map(Order::getSubTotal)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        CustomerTier newTier = CustomerTier.BASIC;
+        if (orderCount >= 20 || totalAmount.compareTo(BigDecimal.valueOf(15_000)) >= 0)
+            newTier = CustomerTier.PLATINUM;
+        else if (orderCount >= 10 || totalAmount.compareTo(BigDecimal.valueOf(5_000)) >= 0)
+            newTier = CustomerTier.GOLD;
+        else if (orderCount >= 3 || totalAmount.compareTo(BigDecimal.valueOf(1_000)) >= 0)
+            newTier = CustomerTier.SILVER;
+        if (!client.getLoyaltyLevel().equals(newTier)) {
+            client.setLoyaltyLevel(newTier);
+            clientRepository.save(client);
+        }
     }
 
     private Order handleStatusTransition(Order order, OrderStatus newStatus) {
@@ -382,5 +426,26 @@ public class OrderServiceImpl implements OrderService {
         }
 
         return order;
+    }
+
+    private Map<String, Object> validStock(Set<OrderItemDTO> itemsDto, Map<UUID, Product> products) {
+        StringBuilder message = new StringBuilder("Commande rejetée : stock insuffisant.");
+        boolean insufficientStock = false;
+
+        for (OrderItemDTO itemDto : itemsDto) {
+            Product product = products.get(itemDto.getProductUuid());
+
+            if (product.getStock().compareTo(itemDto.getQuantity()) < 0) {
+                insufficientStock = true;
+                message.append(String.format(
+                        "\n- Produit: %s | demandé: %d | disponible: %d",
+                        product.getName(), itemDto.getQuantity(), product.getStock()));
+            }
+        }
+
+        return Map.of(
+                "message", message.toString(),
+                "insufficientStock", insufficientStock
+        );
     }
 }
