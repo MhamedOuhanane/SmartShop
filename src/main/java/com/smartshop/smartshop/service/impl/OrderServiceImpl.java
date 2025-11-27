@@ -5,15 +5,15 @@ import com.smartshop.smartshop.exception.generic.NotFoundException;
 import com.smartshop.smartshop.model.dto.ApiResponse;
 import com.smartshop.smartshop.model.dto.OrderDTO;
 import com.smartshop.smartshop.model.dto.OrderItemDTO;
-import com.smartshop.smartshop.model.entity.Client;
-import com.smartshop.smartshop.model.entity.Order;
-import com.smartshop.smartshop.model.entity.OrderItem;
-import com.smartshop.smartshop.model.entity.Product;
+import com.smartshop.smartshop.model.dto.ProductDTO;
+import com.smartshop.smartshop.model.entity.*;
 import com.smartshop.smartshop.model.enums.CustomerTier;
 import com.smartshop.smartshop.model.enums.OrderStatus;
+import com.smartshop.smartshop.model.enums.PaymentStatus;
 import com.smartshop.smartshop.model.mapper.OrderMapper;
 import com.smartshop.smartshop.repository.ClientRepository;
 import com.smartshop.smartshop.repository.OrderRepository;
+import com.smartshop.smartshop.repository.PaymentRepository;
 import com.smartshop.smartshop.repository.ProductRepository;
 import com.smartshop.smartshop.service.interfaces.OrderService;
 import jakarta.transaction.Transactional;
@@ -59,11 +59,17 @@ public class OrderServiceImpl implements OrderService {
         order.setRemainingAmount(order.getTotal());
 
         order = repository.save(order);
+        Set<Product> products = updateStock(order.getOrderItems(), OrderStatus.PENDING);
+        productRepository.saveAll(products);
+
+        String message = String.format(
+                "Commande pour le client '%s' créée avec succès. Nombre d'articles : %d, Montant total : %.2f MAD.",
+                client.getName(), items.size(), order.getTotal()
+        );
 
         return new ApiResponse<>(
                 LocalDateTime.now(),
-                "Commande pour le client '" + client.getName() + "' créée avec succès. " +
-                        "Nombre d'articles : " + items.size() + ", Montant total : " + order.getTotal() + " MAD.",
+                message,
                 201,
                 mapper.toDto(order),
                 null,
@@ -73,8 +79,32 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public ApiResponse<OrderDTO> update(UUID uuid, OrderDTO dto) {
-        return null;
+    public ApiResponse<OrderDTO> updateStatus(UUID uuid, OrderStatus newStatus) {
+        if (uuid == null)
+            throw new BadRequestException("L'identifiant de la commande est obligatoire.");
+
+        if (newStatus == null)
+            throw new BadRequestException("Le statut de la commande est obligatoire.");
+
+        Order order = repository.findByUuid(uuid)
+                .orElseThrow(() -> new NotFoundException("Aucune commande trouvée avec cet identifiant : " + uuid));
+
+        order = handleStatusTransition(order, newStatus);
+
+        order = repository.save(order);
+        if (newStatus.equals(OrderStatus.CANCELED)) {
+            Set<Product> products = updateStock(order.getOrderItems(), newStatus);
+            productRepository.saveAll(products);
+        }
+
+        return new ApiResponse<>(
+                LocalDateTime.now(),
+                "Le statut de la commande '" + uuid + "' a été mis à jour avec succès à '" + newStatus.getDescription() + "'.",
+                200,
+                mapper.toDto(order),
+                null,
+                null
+        );
     }
 
     @Override
@@ -168,5 +198,72 @@ public class OrderServiceImpl implements OrderService {
 
     private BigDecimal bd(double d) {
         return BigDecimal.valueOf(d);
+    }
+
+    private Set<Product> updateStock(Set<OrderItem> items, OrderStatus status) {
+        if (items == null || items.isEmpty()) return Set.of();
+        Set<Product> products = new HashSet<>();
+        int factor;
+
+        switch (status) {
+            case PENDING -> factor = -1;
+            case CANCELED -> factor = 1;
+            default -> throw new BadRequestException(
+                    "Impossible de mettre à jour le stock pour le statut : " + status
+            );
+        }
+        for (OrderItem item : items) {
+            Product product = item.getProduct();
+            int newStock = product.getStock() + (factor * item.getQuantity());
+
+            if (newStock < 0)
+                throw new BadRequestException(
+                        "Stock insuffisant pour le produit : " + product.getName()
+                );
+
+            product.setStock(newStock);
+            products.add(product);
+        }
+        return products;
+    }
+
+    private Order handleStatusTransition(Order order, OrderStatus newStatus) {
+        if (order.getStatus().equals(newStatus))
+            throw new BadRequestException("Le statut de ce commande est déjà " + newStatus.getDescription());
+
+        if (newStatus == OrderStatus.REJECTED)
+            throw new BadRequestException(
+                    "Le statut 'Rejetée' est réservé pour les commandes automatiquement rejetées (ex: stock insuffisant) et ne peut pas être défini manuellement."
+            );
+
+        if (order.getStatus() != OrderStatus.PENDING)
+            throw new BadRequestException(
+                    "Transition non autorisée depuis le statut '" + order.getStatus().getDescription() + "'."
+            );
+
+        switch (newStatus) {
+            case CONFIRMED -> {
+                if (order.getRemainingAmount().compareTo(BigDecimal.ZERO) != 0)
+                    throw new BadRequestException(
+                            "Impossible de confirmer la commande : le montant restant à payer est de " + order.getRemainingAmount()
+                    );
+
+                order.setStatus(newStatus);
+            }
+
+            case CANCELED -> {
+                if (order.getRemainingAmount().compareTo(order.getTotal()) != 0)
+                    throw new BadRequestException(
+                            "Impossible d'annuler la commande : au moins un paiement a déjà été effectué."
+                    );
+
+                order.setStatus(newStatus);
+            }
+
+            case PENDING -> throw new BadRequestException("Transition non autorisée : Le statut ne peut pas être modifié a 'en attente'.");
+            default -> throw new BadRequestException("Transition de statut non reconnue");
+        }
+
+        return order;
     }
 }

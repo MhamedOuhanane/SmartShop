@@ -27,7 +27,7 @@ public class AdminController {
         var result = clientService.create(dto);
         result.setPath(req.getRequestURI());
 
-        return ResponseEntity.status((int) result.getStatus()).body(result);
+        return ResponseEntity.status(result.getStatus()).body(result);
     }
 
     @PutMapping("/clients/{uuid}")
@@ -39,7 +39,7 @@ public class AdminController {
         var result = clientService.update(uuid, dto);
         result.setPath(req.getRequestURI());
 
-        return ResponseEntity.status((int) result.getStatus()).body(result);
+        return ResponseEntity.status(result.getStatus()).body(result);
     }
 
 
@@ -53,6 +53,6 @@ public class AdminController {
         var result = clientService.findAll(page, size);
         result.setPath(req.getRequestURI());
 
-        return ResponseEntity.status((int) result.getStatus()).body(result);
+        return ResponseEntity.status(result.getStatus()).body(result);
     }
 }

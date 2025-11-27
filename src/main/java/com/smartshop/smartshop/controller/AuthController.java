@@ -25,7 +25,7 @@ public class AuthController {
             HttpServletRequest req
     ) {
         var result = userService.login(dto, req);
-        return ResponseEntity.status((int) result.getStatus()).body(result);
+        return ResponseEntity.status(result.getStatus()).body(result);
     }
 
     @GetMapping("/logout")

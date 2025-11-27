@@ -28,7 +28,7 @@ public class ClientController {
         if (req.getSession(false).getAttribute("user_role").equals(UserRole.CLIENT))
             result.setMessage("Votre information personnelle trouvés avec succès!");
 
-        return ResponseEntity.status((int) result.getStatus()).body(result);
+        return ResponseEntity.status(result.getStatus()).body(result);
     }
 
 }
