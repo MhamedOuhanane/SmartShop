@@ -1,13 +1,14 @@
 package com.smartshop.smartshop.model.dto;
 
 import com.smartshop.smartshop.model.enums.OrderStatus;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.List;
 import java.util.UUID;
 
 @Getter
@@ -37,7 +38,8 @@ public class OrderDTO {
     private String clientName;
 
     @NotNull(message = "La liste des produits est obligatoire")
-    private Set<OrderItemDTO> orderItems;
+    @Size(min = 1, message = "La commande doit contenir au moins un produit")
+    private List<@Valid OrderItemDTO> orderItems;
 
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;

@@ -7,6 +7,7 @@ import org.hibernate.annotations.SoftDelete;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -35,5 +36,5 @@ public class Product extends Auditable{
     private LocalDateTime deletedAt;
 
     @OneToMany(mappedBy = "product", fetch = FetchType.LAZY)
-    private Set<OrderItem> orderItems;
+    private List<OrderItem> orderItems;
 }

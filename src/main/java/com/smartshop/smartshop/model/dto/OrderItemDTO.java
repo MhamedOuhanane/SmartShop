@@ -1,6 +1,7 @@
 package com.smartshop.smartshop.model.dto;
 
 import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
@@ -15,6 +16,7 @@ import java.util.UUID;
 public class OrderItemDTO {
     @NotNull(message = "La quantité est obligatoire")
     @Min(value = 1, message = "La quantité doit être au moins 1")
+    @Max(value = 100, message = "La quantité doit être au plus 100")
     private Integer quantity;
 
     private UUID orderUuid;

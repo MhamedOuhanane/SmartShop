@@ -5,7 +5,9 @@ import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -30,7 +32,5 @@ public class Client extends User{
 
     @Builder.Default
     @OneToMany(mappedBy = "client", fetch = FetchType.LAZY)
-    private Set<Order> orders = new HashSet<>();
-
-
+    private List<Order> orders = new ArrayList<>();
 }

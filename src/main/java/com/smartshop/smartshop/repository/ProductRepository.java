@@ -8,11 +8,14 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 public interface ProductRepository extends JpaRepository<Product, UUID> {
     Optional<Product> findByName(String name);
+    List<Product> findByUuidIn(List<UUID> uuids);
 
     @Query("Select p From Product p Where p.uuid = :uuid And p.deletedAt Is Null")
     Optional<Product> findByUuid(UUID uuid);

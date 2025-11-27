@@ -55,7 +55,7 @@ public class OrderServiceImpl implements OrderService {
         order.setClient(client);
         order.setStatus(status);
 
-        Set<OrderItem> items = buildOrderItem(order, dto.getOrderItems(), products);
+        List<OrderItem> items = buildOrderItem(order, dto.getOrderItems(), products);
         BigDecimal subTotal = calculSubTotal(items);
 
         order.setOrderItems(items);
@@ -68,7 +68,7 @@ public class OrderServiceImpl implements OrderService {
 
         order = repository.save(order);
         if (status == OrderStatus.PENDING) {
-            Set<Product> productsUpdate = updateStock(order.getOrderItems(), OrderStatus.PENDING);
+            List<Product> productsUpdate = updateStock(order.getOrderItems(), OrderStatus.PENDING);
             productRepository.saveAll(productsUpdate);
         }
 
@@ -100,10 +100,10 @@ public class OrderServiceImpl implements OrderService {
 
         order = repository.save(order);
         if (newStatus.equals(OrderStatus.CANCELED)) {
-            Set<Product> products = updateStock(order.getOrderItems(), newStatus);
+            List<Product> products = updateStock(order.getOrderItems(), newStatus);
             productRepository.saveAll(products);
         } else if (newStatus.equals(OrderStatus.CONFIRMED))
-            handleLoyaltyLevelClient(order);
+            handleLoyaltyLevelClient(order.getClient());
 
         return new ApiResponse<>(
                 LocalDateTime.now(),
@@ -221,7 +221,7 @@ public class OrderServiceImpl implements OrderService {
         Client client = clientRepository.findByUuid(uuid)
                 .orElseThrow(() -> new NotFoundException("Aucun client trouvé avec cet identifiant"));
 
-        Set<Order> orders = repository.findAllByClient(client);
+        List<Order> orders = repository.findAllByClient(client);
 
         int count = orders.size();
         BigDecimal total = orders.stream()
@@ -253,11 +253,11 @@ public class OrderServiceImpl implements OrderService {
         );
     }
 
-    private Map<UUID, Product> loadProducts(Set<OrderItemDTO> itemsDto) {
-        Set<UUID> uuids = itemsDto.stream()
+    private Map<UUID, Product> loadProducts(List<OrderItemDTO> itemsDto) {
+        List<UUID> uuids = itemsDto.stream()
                 .map(OrderItemDTO::getProductUuid)
-                .collect(Collectors.toSet());
-        Set<Product> products = repository.findByUuidIn(uuids);
+                .toList();
+        List<Product> products = productRepository.findByUuidIn(uuids);
 
         if (products.size() != uuids.size()) {
             List<UUID> foundUuids = products.stream()
@@ -277,7 +277,7 @@ public class OrderServiceImpl implements OrderService {
                 .collect(Collectors.toMap(Product::getUuid, p -> p));
     }
 
-    private Set<OrderItem> buildOrderItem(Order order, Set<OrderItemDTO> itemsDto, Map<UUID, Product> products) {
+    private List<OrderItem> buildOrderItem(Order order, List<OrderItemDTO> itemsDto, Map<UUID, Product> products) {
         return itemsDto.stream().map( dto -> {
             Product product = products.get(dto.getProductUuid());
             return OrderItem.builder()
@@ -287,10 +287,10 @@ public class OrderServiceImpl implements OrderService {
                     .unitPrice(product.getPrice())
                     .totalLine(product.getPrice().multiply(BigDecimal.valueOf(dto.getQuantity())))
                     .build();
-        }).collect(Collectors.toSet());
+        }).toList();
     }
 
-    private BigDecimal calculateVAT(Set<OrderItem> items) {
+    private BigDecimal calculateVAT(List<OrderItem> items) {
         return items.stream()
                 .map(i -> i.getUnitPrice()
                         .multiply(i.getProduct().getPrcTVA())
@@ -299,7 +299,7 @@ public class OrderServiceImpl implements OrderService {
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
-    private BigDecimal calculSubTotal(Set<OrderItem> items) {
+    private BigDecimal calculSubTotal(List<OrderItem> items) {
         return items.stream()
                 .map(OrderItem::getTotalLine)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
@@ -314,6 +314,7 @@ public class OrderServiceImpl implements OrderService {
 
     private BigDecimal calculDiscountPorc(Client client, BigDecimal subTotal) {
         Map<CustomerTier, TreeMap<BigDecimal, BigDecimal>> rules = Map.of(
+                CustomerTier.BASIC, new TreeMap<>(Map.of()),
                 CustomerTier.SILVER, new TreeMap<>(Map.of(
                         bd(500), bd(.05)
                 )),
@@ -336,9 +337,9 @@ public class OrderServiceImpl implements OrderService {
         return BigDecimal.valueOf(d);
     }
 
-    private Set<Product> updateStock(Set<OrderItem> items, OrderStatus status) {
-        if (items == null || items.isEmpty()) return Set.of();
-        Set<Product> products = new HashSet<>();
+    private List<Product> updateStock(List<OrderItem> items, OrderStatus status) {
+        if (items == null || items.isEmpty()) return List.of();
+        List<Product> products = new ArrayList<>();
         int factor;
 
         switch (status) {
@@ -363,12 +364,10 @@ public class OrderServiceImpl implements OrderService {
         return products;
     }
 
-    private void handleLoyaltyLevelClient(Order confirmedOrder) {
-        Client client = confirmedOrder.getClient();
-        Set<Order> orders = repository.findAllByClient(client).stream()
+    private void handleLoyaltyLevelClient(Client client) {
+        List<Order> orders = repository.findAllByClient(client).stream()
                 .filter(o -> o.getStatus() == OrderStatus.CONFIRMED)
-                .collect(Collectors.toSet());
-        orders.add(confirmedOrder);
+                .toList();
 
         int orderCount = orders.size();
         BigDecimal totalAmount = orders.stream()
@@ -428,7 +427,7 @@ public class OrderServiceImpl implements OrderService {
         return order;
     }
 
-    private Map<String, Object> validStock(Set<OrderItemDTO> itemsDto, Map<UUID, Product> products) {
+    private Map<String, Object> validStock(List<OrderItemDTO> itemsDto, Map<UUID, Product> products) {
         StringBuilder message = new StringBuilder("Commande rejetée : stock insuffisant.");
         boolean insufficientStock = false;
 
@@ -438,7 +437,7 @@ public class OrderServiceImpl implements OrderService {
             if (product.getStock().compareTo(itemDto.getQuantity()) < 0) {
                 insufficientStock = true;
                 message.append(String.format(
-                        "\n- Produit: %s | demandé: %d | disponible: %d",
+                        "; Produit: %s | demandé: %d | disponible: %d",
                         product.getName(), itemDto.getQuantity(), product.getStock()));
             }
         }

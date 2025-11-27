@@ -9,7 +9,9 @@ import lombok.experimental.SuperBuilder;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -50,58 +52,14 @@ public class Order extends Auditable{
 
     @Builder.Default
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
-    private Set<OrderItem> orderItems = new HashSet<>();
+    private List<OrderItem> orderItems = new ArrayList<>();
 
     @Builder.Default
     @OneToMany(mappedBy = "order")
-    private Set<Payment> payments = new HashSet<>();
+    private List<Payment> payments = new ArrayList<>();
 
 
     @ManyToOne
     @JoinColumn(name = "client_id")
     private Client client;
-
-
-    @PrePersist
-    public void calculate() {
-        subTotal = orderItems.stream()
-                .map(OrderItem::getTotalLine)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
-
-        CustomerTier tier = client != null ? client.getLoyaltyLevel() : CustomerTier.BASIC;
-
-        if (tier == CustomerTier.BASIC) {
-            discount = BigDecimal.ZERO;
-        } else if (tier == CustomerTier.SILVER) {
-            discount = subTotal.compareTo(BigDecimal.valueOf(500)) >= 0
-                    ? BigDecimal.valueOf(0.05)
-                    : BigDecimal.ZERO;
-        } else if (tier == CustomerTier.GOLD) {
-            if (subTotal.compareTo(BigDecimal.valueOf(800)) >= 0)
-                discount = BigDecimal.valueOf(0.10);
-            else if (subTotal.compareTo(BigDecimal.valueOf(500)) >= 0)
-                discount = BigDecimal.valueOf(0.05);
-            else
-                discount = BigDecimal.ZERO;
-        } else {
-            if (subTotal.compareTo(BigDecimal.valueOf(1200)) >= 0)
-                discount = BigDecimal.valueOf(0.15);
-            else if (subTotal.compareTo(BigDecimal.valueOf(800)) >= 0)
-                discount = BigDecimal.valueOf(0.10);
-            else if (subTotal.compareTo(BigDecimal.valueOf(500)) >= 0)
-                discount = BigDecimal.valueOf(0.05);
-            else
-                discount = BigDecimal.ZERO;
-        }
-
-        BigDecimal discountAmount = subTotal.multiply(discount);
-        BigDecimal ht = subTotal.subtract(discountAmount);
-
-        BigDecimal TVA = BigDecimal.valueOf(0.20);
-        vat = ht.multiply(TVA);
-        total = ht.add(vat);
-        remainingAmount = total;
-    }
-
-
 }
