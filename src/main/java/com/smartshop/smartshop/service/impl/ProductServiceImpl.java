@@ -82,17 +82,17 @@ public class ProductServiceImpl implements ProductService {
 
         if (dto.getStock() != null && !product.getStock().equals(dto.getStock())) {
             product.setStock(dto.getStock());
-            updated = false;
+            updated = true;
         }
 
         if (!product.getPrcTVA().equals(dto.getPrcTVA())) {
-            product.setStock(dto.getStock());
-            updated = false;
+            product.setPrcTVA(dto.getPrcTVA());
+            updated = true;
         }
 
         if (!product.getPrice().equals(dto.getPrice())) {
             product.setPrice(dto.getPrice());
-            updated = false;
+            updated = true;
         }
 
         if (updated)
