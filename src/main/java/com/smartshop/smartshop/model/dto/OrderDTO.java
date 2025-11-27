@@ -19,6 +19,7 @@ import java.util.UUID;
 public class OrderDTO {
     protected UUID uuid;
 
+    private LocalDateTime date;
     private BigDecimal subTotal;
     private BigDecimal discount;
 

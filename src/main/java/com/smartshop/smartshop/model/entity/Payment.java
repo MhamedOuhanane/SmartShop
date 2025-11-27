@@ -21,7 +21,7 @@ public class Payment extends Auditable {
     @Column(name = "payment_number", nullable = false)
     private Integer paymentNumber;
 
-    @Column(nullable = false, precision = 10, scale = 2)
+    @Column(nullable = false, precision = 15, scale = 2)
     private BigDecimal amount;
 
     @Enumerated(EnumType.STRING)

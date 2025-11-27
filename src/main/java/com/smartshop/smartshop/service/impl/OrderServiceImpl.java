@@ -120,7 +120,7 @@ public class OrderServiceImpl implements OrderService {
         page = page == null ? 0 : page;
         size = size == null ? 5 : size;
 
-        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").ascending());
+        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
         Page<Order> payments = repository.findAll(pageable);
 
         String message = "Aucun commande n'existe dans le système";
@@ -176,12 +176,12 @@ public class OrderServiceImpl implements OrderService {
             throw new BadRequestException("UUID du client ne peuvent pas être vides");
 
         Client client = clientRepository.findByUuid(uuid)
-                .orElseThrow(() -> new NotFoundException("Aucun client trouvé avec cet identifiant"));
+                .orElseThrow(() -> new NotFoundException("Aucun client trouvé avec identifiant: "+ uuid));
 
         page = page == null ? 0 : page;
         size = size == null ? 5 : size;
 
-        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").ascending());
+        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
         Page<Order> payments = repository.findByClient(client, pageable);
 
         String message = "Aucun commande n'existe!";
@@ -225,6 +225,7 @@ public class OrderServiceImpl implements OrderService {
 
         int count = orders.size();
         BigDecimal total = orders.stream()
+                .filter(o -> o.getStatus() == OrderStatus.CONFIRMED)
                 .map(Order::getSubTotal)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
         LocalDateTime first = orders.stream()

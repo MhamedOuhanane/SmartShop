@@ -26,17 +26,17 @@ public class Order extends Auditable{
     @Column(nullable = false)
     private LocalDateTime date;
 
-    @Column(name = "sub_total", nullable = false, precision = 10, scale = 2)
+    @Column(name = "sub_total", nullable = false, precision = 15, scale = 2)
     private BigDecimal subTotal;
 
 
     @Column(nullable = false, precision = 5, scale = 3)
     private BigDecimal discount;
 
-    @Column(nullable = false, precision = 10, scale = 2)
+    @Column(nullable = false, precision = 15, scale = 2)
     private BigDecimal vat;
 
-    @Column(nullable = false, precision = 10, scale = 2)
+    @Column(nullable = false, precision = 15, scale = 2)
     private BigDecimal total;
 
     @Column(name = "promo_code")
@@ -47,7 +47,7 @@ public class Order extends Auditable{
     @Column(nullable = false)
     private OrderStatus status = OrderStatus.PENDING;
 
-    @Column(name = "remaining_amount", precision = 10, scale = 2)
+    @Column(name = "remaining_amount", precision = 15, scale = 2)
     private BigDecimal remainingAmount;
 
     @Builder.Default
