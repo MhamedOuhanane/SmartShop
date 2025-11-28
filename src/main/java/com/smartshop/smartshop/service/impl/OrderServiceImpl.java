@@ -77,7 +77,7 @@ public class OrderServiceImpl implements OrderService {
         return new ApiResponse<>(
                 LocalDateTime.now(),
                 message,
-                201,
+                status == OrderStatus.REJECTED ? 400 : 201,
                 mapper.toDto(order),
                 null,
                 null
@@ -307,7 +307,8 @@ public class OrderServiceImpl implements OrderService {
     }
 
     private BigDecimal calculTotal(Order order) {
-        BigDecimal discountAmount = order.getSubTotal().multiply(order.getDiscount());
+        BigDecimal promo = order.getPromoCode() == null ? bd(0.) : bd(.05);
+        BigDecimal discountAmount = order.getSubTotal().multiply(order.getDiscount().add(promo));
         BigDecimal amountHt = order.getSubTotal().subtract(discountAmount);
 
         return amountHt.add(order.getVat());

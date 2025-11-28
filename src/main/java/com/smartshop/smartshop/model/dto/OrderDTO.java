@@ -3,6 +3,7 @@ package com.smartshop.smartshop.model.dto;
 import com.smartshop.smartshop.model.enums.OrderStatus;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.*;
 
@@ -27,6 +28,10 @@ public class OrderDTO {
 
     private BigDecimal total;
 
+    @Pattern(
+            regexp = "^PROMO-[A-Z0-9]{4}$",
+            message = "Le code promo doit être au format 'PROMO-XXXX'"
+    )
     private String promoCode;
 
     private OrderStatus status;
