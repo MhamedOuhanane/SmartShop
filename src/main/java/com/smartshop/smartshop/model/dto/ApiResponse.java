@@ -17,5 +17,6 @@ public class ApiResponse<T> {
     private int status;
     private T data;
     private String path;
-    private PaginationDTO pagination;
+
+    private PaginationDTO pagination = null;
 }

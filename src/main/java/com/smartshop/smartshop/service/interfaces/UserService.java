@@ -8,5 +8,5 @@ import jakarta.servlet.http.HttpServletRequest;
 import java.util.Map;
 
 public interface UserService {
-    ApiResponse<UserDTO> login(LoginDto dto, HttpServletRequest req);
+    ApiResponse<UserDTO> login(LoginDto dto);
 }

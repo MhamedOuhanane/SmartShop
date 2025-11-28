@@ -25,7 +25,7 @@ public class UserServiceImpl implements UserService {
 
 
     @Override
-    public ApiResponse<UserDTO> login(LoginDto dto, HttpServletRequest req) {
+    public ApiResponse<UserDTO> login(LoginDto dto) {
         User user = userRepository.findByUsername(dto.getUsername())
                 .orElseThrow(() -> new NotFoundException("L'utilisateur avec l'username '" + dto.getUsername() + "' n'existe pas !"));
 
@@ -33,16 +33,12 @@ public class UserServiceImpl implements UserService {
             throw new InvalidCredentialsException("Username d'utilisateur ou mot de passe incorrect");
         }
 
-        HttpSession session = req.getSession(true);
-        session.setAttribute("user_uuid", user.getUuid());
-        session.setAttribute("user_role", user.getRole());
-
         return new ApiResponse<>(
                 LocalDateTime.now(),
                 "Connexion réussie",
                 200,
                 mapper.toDto(user),
-                req.getRequestURI(),
+                null,
                 null
         );
     }
