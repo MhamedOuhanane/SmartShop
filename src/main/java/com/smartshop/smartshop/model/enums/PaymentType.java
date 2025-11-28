@@ -8,7 +8,6 @@ import lombok.RequiredArgsConstructor;
 public enum PaymentType {
     CASH("Espèces"),
     CHEQUE("Chèque"),
-
     TRANSFER("Virement");
 
     private final String description;

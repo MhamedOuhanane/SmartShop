@@ -5,6 +5,7 @@ import com.smartshop.smartshop.model.entity.Order;
 import com.smartshop.smartshop.model.enums.OrderStatus;
 import com.smartshop.smartshop.repository.OrderRepository;
 import com.smartshop.smartshop.service.interfaces.OrderService;
+import com.smartshop.smartshop.service.interfaces.PaymentService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +21,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class OrderController {
     private final OrderService service;
+    private final PaymentService paymentService;
 
     @GetMapping
     public ResponseEntity<?> shows(
@@ -62,6 +64,19 @@ public class OrderController {
             HttpServletRequest req
     ) {
         var result = service.updateStatus(uuid, status);
+
+        result.setPath(req.getRequestURI());
+        return ResponseEntity.status(result.getStatus()).body(result);
+    }
+
+    @GetMapping("/{uuid}/payments")
+    public ResponseEntity<?> showsPayment(
+            @PathVariable("uuid") UUID uuid,
+            @RequestParam(defaultValue = "0") Integer page,
+            @RequestParam(defaultValue = "5") Integer size,
+            HttpServletRequest req
+    ) {
+        var result = paymentService.findOrderPayments(uuid, page, size);
 
         result.setPath(req.getRequestURI());
         return ResponseEntity.status(result.getStatus()).body(result);
