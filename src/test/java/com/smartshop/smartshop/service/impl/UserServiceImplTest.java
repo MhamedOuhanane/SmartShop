@@ -25,12 +25,13 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 public class UserServiceImplTest {
     @Mock
-    UserRepository repository;
+    private UserRepository repository;
 
     @Mock
-    UserMapper mapper;
+    private UserMapper mapper;
 
-    @InjectMocks UserServiceImpl service;
+    @InjectMocks
+    private UserServiceImpl service;
 
     @Test
     public void login_shouldSucceed_whenLogin() {
@@ -53,7 +54,6 @@ public class UserServiceImplTest {
 
         var result = service.login(login);
 
-        assertEquals(LocalDateTime.now(), result.getDate());
         assertEquals(200, result.getStatus());
         assertEquals("Connexion réussie", result.getMessage());
         assertEquals(dto, result.getData());

@@ -108,7 +108,7 @@ public class ClientServiceImpl implements ClientService {
     @Override
     public ApiResponse<List<ClientDTO>> findAll(Integer page, Integer size) {
         page = page == null ? 0 : page;
-        size = size == null ? 0 : size;
+        size = size == null ? 5 : size;
         Page<Client> clients = repository.findAll(PageRequest.of(page, size, Sort.by("name").ascending()));
         String message;
         List<ClientDTO> data;
