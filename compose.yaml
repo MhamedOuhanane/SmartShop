@@ -1,0 +1,62 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: smartshop-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: smartshop
+      POSTGRES_USER: smartshop
+      POSTGRES_PASSWORD: root
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - smartshop-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U smartshop"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    image: smartshop-backend:1.0.0
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: smartshop-backend
+    restart: unless-stopped
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/smartshop
+      SPRING_DATASOURCE_USERNAME: smartshop
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE}
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - smartshop-network
+
+  pgadmin:
+    image: dpage/pgadmin4:7
+    container_name: smartshop-pgadmin
+    restart: unless-stopped
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD}
+    ports:
+      - "8081:80"
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    depends_on:
+      - postgres
+    networks:
+      - smartshop-network
+
+volumes:
+  postgres_data:
+  pgadmin_data:
+
+networks:
+  smartshop-network:
+    driver: bridge

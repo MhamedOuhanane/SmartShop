@@ -15,4 +15,5 @@ public interface ProductService {
     ApiResponse<ProductDTO> restore(UUID uuid);
     ApiResponse<List<ProductDTO>> findAllDeleted(Integer page, Integer size);
     ApiResponse<ProductDTO> findDeleted(UUID uuid);
+    ApiResponse<List<ProductDTO>> MiseSituiation();
 }

@@ -6,6 +6,7 @@ import com.smartshop.smartshop.exception.generic.NotFoundException;
 import com.smartshop.smartshop.model.dto.ApiResponse;
 import com.smartshop.smartshop.model.dto.PaginationDTO;
 import com.smartshop.smartshop.model.dto.ProductDTO;
+import com.smartshop.smartshop.model.entity.Auditable;
 import com.smartshop.smartshop.model.entity.Product;
 import com.smartshop.smartshop.model.enums.UserRole;
 import com.smartshop.smartshop.model.mapper.ProductMapper;
@@ -19,7 +20,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -261,4 +264,27 @@ public class ProductServiceImpl implements ProductService {
                 null
         );
     }
+
+    @Override
+    public ApiResponse<List<ProductDTO>> MiseSituiation() {
+        List<Product> products = repository.findAll();
+
+        List<ProductDTO> productDTOs = products.stream().filter(p -> p.getPrice().compareTo(BigDecimal.valueOf(2000)) >= 0)
+                .map(p -> {
+                    p.setPrcTVA(BigDecimal.valueOf(0.1));
+                    return p;
+                }).sorted(Comparator.comparing(Auditable::getCreatedAt))
+                .map(mapper::toDto).toList();
+
+        return new ApiResponse<>(
+                LocalDateTime.now(),
+                "Le produit trouvés avec succès",
+                200,
+                productDTOs,
+                null,
+                null
+        );
+    }
+
+
 }
