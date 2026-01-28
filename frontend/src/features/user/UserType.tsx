@@ -14,7 +14,7 @@ export interface UserState {
 export interface ClientProfile {
     uuid: string;
     username: string;
-    role: "ADMIN" | "USER" | "CUSTOMER";
+    role: UserRole;
     name: string;
     email: string;
     loyaltyLevel?: "BASIC" | "SILVER" | "GOLD" | "PLATINUM";
