@@ -2,7 +2,7 @@ export type UserRole = "ADMIN" | "AGENT" | "CLIENT";
 
 export interface User {
     uuid: string,
-    username: String,
+    username: string,
     role: UserRole
 }
 
