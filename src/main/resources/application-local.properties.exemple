@@ -1,0 +1,5 @@
+spring.application.name=smartshop
+
+spring.datasource.url=jdbc:postgresql://localhost:5432/database-name
+spring.datasource.username=postgres
+spring.datasource.password=password
