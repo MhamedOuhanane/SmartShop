@@ -20,7 +20,8 @@ api.interceptors.response.use(
 
         if (status === 401) {
             console.log("Unauthorized! Redirect to login")
-            window.location.href = "/login"
+            localStorage.removeItem("user");
+            window.location.href = "/login";
         } else if (status === 403) {
             console.log("Forbidden! Access denied")
         }
