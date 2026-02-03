@@ -62,6 +62,7 @@ public class AuthController {
         return ResponseEntity.status(result.getStatus()).body(result);
     }
 
+
     @Operation(
             summary = "Déconnexion d'utilisateur",
             description = "Invalide la session utilisateur actuelle (JSESSIONID).",

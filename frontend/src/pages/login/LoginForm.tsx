@@ -4,15 +4,8 @@ import * as yup from "yup";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { loginSuccess } from "../../features/user/UserSlice";
-import api from "../../services/api";
+import { authService } from "../../services/authService";
 import type { AxiosError } from "axios";
-import type { User } from "../../features/user/UserType";
-
-interface LoginResponse {
-    data: User;
-    message: string;
-    status: number;
-}
 
 interface MyBackendError {
     errors?: Record<string, string>;
@@ -30,34 +23,39 @@ const LoginForm = () => {
     const dispatch = useDispatch();
     const navigate = useNavigate();
 
-    const { register, handleSubmit, setError, formState: { errors, isSubmitting } } = useForm<FormData>({
+    const { 
+        register, 
+        handleSubmit, 
+        setError, 
+        formState: { errors, isSubmitting } 
+    } = useForm<FormData>({
         resolver: yupResolver(schema)
     });
 
     const onSubmit = async (data: FormData) => {
         try {
-            const response = await api.post<LoginResponse>("/auth/login", data);
+            const responseData = await authService.login(data);
             
-            if (response.status === 200) {
-                dispatch(loginSuccess(response.data.data));
-                const role = response.data.data.role;
-                if (role === "ADMIN") navigate("/admin");
-                else if (role === "AGENT") navigate("/agent");
-                else navigate("/client");
-            }
+            dispatch(loginSuccess(responseData.data));
+            
+            const role = responseData.data.role;
+            if (role === "ADMIN") navigate("/admin");
+            else if (role === "AGENT") navigate("/agent");
+            else navigate("/client");
+
         } catch (err) {
             const axiosError = err as AxiosError<MyBackendError>;
-            const responseData = axiosError.response?.data;
+            const responseBody = axiosError.response?.data;
 
-            if (axiosError.response?.status === 400 && responseData?.errors) {
-                Object.keys(responseData.errors).forEach((field) => {
+            if (axiosError.response?.status === 400 && responseBody?.errors) {
+                Object.keys(responseBody.errors).forEach((field) => {
                     setError(field as keyof FormData, {
                         type: "server",
-                        message: responseData.errors![field]
+                        message: responseBody.errors![field]
                     });
                 });
             } else {
-                alert(responseData?.message || "Erreur de connexion au serveur");
+                alert(responseBody?.message || "Erreur de connexion au serveur");
             }
         }
     };
