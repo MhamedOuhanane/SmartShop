@@ -3,23 +3,23 @@ import { useNavigate } from "react-router-dom";
 import { authService } from "../../services/authService";
 import { logout } from "../../features/user/UserSlice";
 import { toast } from "sonner";
+import { LogOut } from "lucide-react";
 
-const LogoutButton = () => {
+interface LogoutButtonProps {
+    hideText?: boolean;
+}
+
+const LogoutButton = ({ hideText = false }: LogoutButtonProps) => {
     const dispatch = useDispatch();
     const navigate = useNavigate();
 
     const handleLogout = async () => {
         try {
             await authService.logout();
-            toast.success("Déconnexion réussie. ", {
-                duration: 2000
-            });
+            toast.success("Déconnexion réussie");
         } catch (error) {
             const message = error instanceof Error ? error.message : "Erreur lors de la déconnexion";
-    
-            toast.error(message, {
-                duration: 5000
-            });
+            toast.error(message);
         } finally {
             dispatch(logout());
             navigate("/login");
@@ -29,9 +29,18 @@ const LogoutButton = () => {
     return (
         <button 
             onClick={handleLogout}
-            className="flex items-center gap-2 px-4 py-2 bg-red-50 text-red-600 hover:bg-red-100 rounded-lg transition-all"
+            title={hideText ? "Se déconnecter" : ""}
+            className={`flex items-center gap-3 w-full px-4 py-3 text-red-400 hover:bg-red-500/10 hover:text-red-500 rounded-xl transition-all duration-200 group ${
+                hideText ? "justify-center" : ""
+            }`}
         >
-            <span>Se déconnecter</span>
+            <LogOut size={20} className="shrink-0 transition-transform group-hover:-translate-x-1" />
+            
+            {!hideText && (
+                <span className="font-medium text-sm whitespace-nowrap overflow-hidden">
+                    Se déconnecter
+                </span>
+            )}
         </button>
     );
 };
