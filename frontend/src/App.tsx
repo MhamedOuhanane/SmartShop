@@ -9,13 +9,15 @@ import LoginForm from './pages/login/LoginForm';
 import HomeRedirect from './components/auth/HomeRedirect';
 import Unauthorized from './pages/error/Unauthorized';
 import NotFound from './pages/error/NotFound';
-
+import { Toaster } from 'sonner';
 function App() {
   const {isAuthenticated, user}: UserState = useSelector((state: RootState) => state.user);
 
     console.log(user);
   return (
-    <BrowserRouter>
+    <>
+      <Toaster position="top-right" richColors closeButton />
+      <BrowserRouter>
       <Routes>
         <Route path="/" element={<HomeRedirect />} />
         <Route element={<PublicRoute isAuth={isAuthenticated} />}>
@@ -28,6 +30,7 @@ function App() {
         <Route path='*' element={<NotFound />} />
       </Routes>
     </BrowserRouter>
+    </>
   )
 }
 

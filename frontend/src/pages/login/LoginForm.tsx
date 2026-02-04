@@ -6,6 +6,7 @@ import { useNavigate } from "react-router-dom";
 import { loginSuccess } from "../../features/user/UserSlice";
 import { authService } from "../../services/authService";
 import type { AxiosError } from "axios";
+import { toast } from "sonner";
 
 interface MyBackendError {
     errors?: Record<string, string>;
@@ -38,6 +39,11 @@ const LoginForm = () => {
             
             dispatch(loginSuccess(responseData.data));
             
+            toast.success(`Bienvenue, ${responseData.data.username} !`, {
+                duration: 4000,
+                icon: '🚀',
+            });
+
             const role = responseData.data.role;
             if (role === "ADMIN") navigate("/admin");
             else if (role === "AGENT") navigate("/agent");
@@ -55,7 +61,13 @@ const LoginForm = () => {
                     });
                 });
             } else {
-                alert(responseBody?.message || "Erreur de connexion au serveur");
+                toast.error(responseBody?.message || "Identifiants invalides", {
+                    style: {
+                        borderRadius: '10px',
+                        background: '#333',
+                        color: '#fff',
+                    },
+                });
             }
         }
     };

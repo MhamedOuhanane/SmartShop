@@ -1,4 +1,5 @@
-import axios, {AxiosError} from 'axios'
+import axios, {AxiosError} from 'axios';
+import { toast } from 'sonner';
 
 const api = axios.create({
     baseURL: import.meta.env.VITE_API_URL,
@@ -19,11 +20,13 @@ api.interceptors.response.use(
         const status: number = error.response?.status
 
         if (status === 401) {
-            console.log("Unauthorized! Redirect to login")
             localStorage.removeItem("user");
-            window.location.href = "/login";
+            toast.error("Session expirée. Veuillez vous reconnecter.");
+            setTimeout(() => {
+                window.location.href = "/login";
+            }, 1500);
         } else if (status === 403) {
-            console.log("Forbidden! Access denied")
+            toast.error("Accès refusé : Vous n'avez pas les droits nécessaires.");
         }
 
         return Promise.reject(error)

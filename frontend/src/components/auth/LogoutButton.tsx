@@ -2,6 +2,7 @@ import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { authService } from "../../services/authService";
 import { logout } from "../../features/user/UserSlice";
+import { toast } from "sonner";
 
 const LogoutButton = () => {
     const dispatch = useDispatch();
@@ -10,8 +11,15 @@ const LogoutButton = () => {
     const handleLogout = async () => {
         try {
             await authService.logout();
+            toast.success("Déconnexion réussie. ", {
+                duration: 2000
+            });
         } catch (error) {
-            console.error("Erreur lors de la déconnexion du serveur", error);
+            const message = error instanceof Error ? error.message : "Erreur lors de la déconnexion";
+    
+            toast.error(message, {
+                duration: 5000
+            });
         } finally {
             dispatch(logout());
             navigate("/login");
