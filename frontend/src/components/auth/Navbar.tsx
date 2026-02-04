@@ -1,5 +1,5 @@
 import { Menu, X, Bell } from "lucide-react";
-import type { User } from "../../features/user/UserType";
+import type { User } from "../../type/UserType";
 
 interface NavbarProps {
     isOpen: boolean;

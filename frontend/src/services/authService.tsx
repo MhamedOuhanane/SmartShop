@@ -1,4 +1,4 @@
-import type { User } from "../features/user/UserType";
+import type { User } from "../type/UserType";
 import api from "./api";
 
 interface LoginResponse {

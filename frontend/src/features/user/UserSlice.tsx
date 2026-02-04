@@ -1,4 +1,4 @@
-import type {User, UserState} from "./UserType.tsx";
+import type {User, UserState} from "../../type/UserType.tsx";
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
 
 const savedUser = localStorage.getItem("user");
