@@ -1,7 +1,7 @@
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { authService } from "../services/authService";
-import { logout } from "../features/user/UserSlice";
+import { authService } from "../../services/authService";
+import { logout } from "../../features/user/UserSlice";
 
 const LogoutButton = () => {
     const dispatch = useDispatch();

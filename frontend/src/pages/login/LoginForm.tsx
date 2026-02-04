@@ -6,7 +6,6 @@ import { useNavigate } from "react-router-dom";
 import { loginSuccess } from "../../features/user/UserSlice";
 import { authService } from "../../services/authService";
 import type { AxiosError } from "axios";
-import LogoutButton from "../../components/LogoutButton";
 
 interface MyBackendError {
     errors?: Record<string, string>;
