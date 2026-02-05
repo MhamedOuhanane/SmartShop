@@ -15,5 +15,10 @@ export const adminService = {
         const response = await api.post<ApiResponse<Client>>('/admins/clients', clientData);
 
         return response.data;
-    }
+    },
+
+    updateClient: async (uuid: string, clientData: Partial<ClientCreate>) => {
+        const response = await api.put<ApiResponse<Client>>(`/admins/clients/${uuid}`, clientData);
+        return response.data;
+    },
 } 

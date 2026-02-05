@@ -7,18 +7,23 @@ import {
     ChevronRight,
     MoreHorizontal,
     Mail,
-    Calendar
+    Calendar,
+    UserCog
 } from "lucide-react";
 import type { Client } from "../../type/ClientType";
 import type { PaginationDTO } from "../../type/ApiResponse";
 import { AddClientModal } from "@/components/client/AddClientModal";
 import { LoyaltyBadge } from "@/components/client/LoyaltyBadge";
+import { EditClientModal } from "@/components/client/EditClientModal";
 
 const AdminClients = () => {
     const [clients, setClients] = useState<Client[]>([]);
     const [loading, setLoading] = useState(true);
     const [pagination, setPagination] = useState<PaginationDTO | null>(null);
     const [currentPage, setCurrentPage] = useState(0);
+
+    const [selectedClient, setSelectedClient] = useState<Client | null>(null);
+    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
     const fetchClients = async (page: number) => {
         setLoading(true);
@@ -40,6 +45,11 @@ const AdminClients = () => {
     useEffect(() => {
         fetchClients(currentPage);
     }, [currentPage]);
+
+    const handleEditClick = (client: Client) => {
+        setSelectedClient(client);
+        setIsEditModalOpen(true);
+    };
 
     return (
         <div className="space-y-6">
@@ -100,6 +110,13 @@ const AdminClients = () => {
                                             <LoyaltyBadge tier={client.loyaltyLevel} />
                                         </td>
                                         <td className="px-6 py-4 text-right">
+                                            <button 
+                                                onClick={() => handleEditClick(client)}
+                                                className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all"
+                                                title="Modifier le client"
+                                            >
+                                                <UserCog size={18} />
+                                            </button>
                                             <button className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-all">
                                                 <MoreHorizontal size={20} />
                                             </button>
@@ -136,6 +153,18 @@ const AdminClients = () => {
                             </button>
                         </div>
                     </div>
+                )}
+
+                {selectedClient && (
+                    <EditClientModal
+                        client={selectedClient}
+                        isOpen={isEditModalOpen}
+                        onClose={() => {
+                            setIsEditModalOpen(false);
+                            setSelectedClient(null);
+                        }}
+                        onClientUpdated={() => fetchClients(currentPage)}
+                    />
                 )}
             </div>
         </div>
