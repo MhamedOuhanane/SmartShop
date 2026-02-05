@@ -44,10 +44,7 @@ const LoginForm = () => {
                 icon: '🚀',
             });
 
-            const role = responseData.data.role;
-            if (role === "ADMIN") navigate("/admin");
-            else if (role === "AGENT") navigate("/agent");
-            else navigate("/client");
+            navigate('/');
 
         } catch (err) {
             const axiosError = err as AxiosError<MyBackendError>;
