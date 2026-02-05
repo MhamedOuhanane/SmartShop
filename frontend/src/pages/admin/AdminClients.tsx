@@ -12,6 +12,7 @@ import {
 import type { Client } from "../../type/ClientType";
 import type { PaginationDTO } from "../../type/ApiResponse";
 import { AddClientModal } from "@/components/client/AddClientModal";
+import { LoyaltyBadge } from "@/components/client/LoyaltyBadge";
 
 const AdminClients = () => {
     const [clients, setClients] = useState<Client[]>([]);
@@ -63,6 +64,7 @@ const AdminClients = () => {
                                 <tr className="bg-slate-50/50 border-b border-slate-100">
                                     <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Client</th>
                                     <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Contact</th>
+                                    <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Niveau</th>
                                     <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider text-right">Actions</th>
                                 </tr>
                             </thead>
@@ -93,6 +95,9 @@ const AdminClients = () => {
                                                     </span>
                                                 </div>
                                             </div>
+                                        </td>
+                                        <td className="px-6 py-4">
+                                            <LoyaltyBadge tier={client.loyaltyLevel} />
                                         </td>
                                         <td className="px-6 py-4 text-right">
                                             <button className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-all">
