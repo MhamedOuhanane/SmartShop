@@ -5,7 +5,6 @@ import {
     Loader2, 
     ChevronLeft, 
     ChevronRight,
-    MoreHorizontal,
     Mail,
     Calendar,
     UserCog
@@ -116,9 +115,6 @@ const AdminClients = () => {
                                                 title="Modifier le client"
                                             >
                                                 <UserCog size={18} />
-                                            </button>
-                                            <button className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-all">
-                                                <MoreHorizontal size={20} />
                                             </button>
                                         </td>
                                     </tr>
