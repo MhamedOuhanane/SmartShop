@@ -4,8 +4,8 @@ import api from "./api";
 
 export const productService = {
     
-    findAll: async (page: number = 0, size: number = 5): Promise<ApiResponse<Product>> => {
-        const response = await api.get<ApiResponse<Product>>("/products", {
+    findAll: async (page: number = 0, size: number = 5): Promise<ApiResponse<Product[]>> => {
+        const response = await api.get<ApiResponse<Product[]>>("/products", {
             params: { page, size }
         });
         return response.data;
@@ -31,8 +31,8 @@ export const productService = {
         return response.data;
     },
 
-    findAllDeleted: async (page: number = 0, size: number = 5): Promise<ApiResponse<Product>> => {
-        const response = await api.get<ApiResponse<Product>>("/products/deleted", {
+    findAllDeleted: async (page: number = 0, size: number = 5): Promise<ApiResponse<Product[]>> => {
+        const response = await api.get<ApiResponse<Product[]>>("/products/deleted", {
             params: { page, size }
         });
         return response.data;

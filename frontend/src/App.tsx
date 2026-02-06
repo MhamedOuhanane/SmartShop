@@ -13,6 +13,7 @@ import { Toaster } from 'sonner';
 import ProtectedRoute from './routes/ProtectedRoute';
 import AdminLayout from './layouts/AdminLayout';
 import AdminClients from './pages/admin/AdminClients';
+import AdminProduct from './pages/admin/AdminProduct';
 function App() {
   const {isAuthenticated, user}: UserState = useSelector((state: RootState) => state.user);
 
@@ -31,8 +32,9 @@ function App() {
 
         <Route element={<ProtectedRoute isAuth={isAuthenticated} allowedRole={["ADMIN"]} userRole={user?.role ?? 'CLIENT'} />}>
           <Route path="/admin" element={<AdminLayout />}>
-              <Route path="clients" element={<AdminClients />} />
               <Route path="dashboard" element={<div>Dashboard Work in Progress</div>} />
+              <Route path="clients" element={<AdminClients />} />
+              <Route path="products" element={<AdminProduct />} />
             </Route>
         </Route>
 

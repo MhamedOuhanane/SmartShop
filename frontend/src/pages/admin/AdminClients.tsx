@@ -23,6 +23,8 @@ const AdminClients = () => {
 
     const [selectedClient, setSelectedClient] = useState<Client | null>(null);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+    console.log(pagination);
+    
 
     const fetchClients = async (page: number) => {
         setLoading(true);
@@ -133,7 +135,8 @@ const AdminClients = () => {
                             <button
                                 onClick={() => setCurrentPage(prev => prev - 1)}
                                 disabled={pagination.isFirst || loading}
-                                className="p-2 rounded-lg border bg-white text-slate-600 hover:bg-slate-50 disabled:opacity-40 transition-all shadow-sm"
+                                className="p-2 rounded-md border border-slate-300 bg-white text-slate-600 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-sm"
+                                title="Page précédente"
                             >
                                 <ChevronLeft size={18} />
                             </button>
@@ -143,7 +146,8 @@ const AdminClients = () => {
                             <button
                                 onClick={() => setCurrentPage(prev => prev + 1)}
                                 disabled={pagination.isLast || loading}
-                                className="p-2 rounded-lg border bg-white text-slate-600 hover:bg-slate-50 disabled:opacity-40 transition-all shadow-sm"
+                                className="p-2 rounded-md border border-slate-300 bg-white text-slate-600 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-sm"
+                                title="Page suivante"
                             >
                                 <ChevronRight size={18} />
                             </button>
