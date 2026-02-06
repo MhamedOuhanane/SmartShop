@@ -1,24 +1,17 @@
 import { useEffect, useState } from "react";
-import { 
-    Loader2, 
-    ChevronLeft, 
-    ChevronRight, 
-    Package,
-    CircleDollarSign,
-    Layers,
-    Plus
-} from "lucide-react";
+import { Loader2, ChevronLeft, ChevronRight, Package } from "lucide-react";
 import type { Product } from "@/type/ProductType";
 import type { PaginationDTO } from "@/type/ApiResponse";
-import { productService } from "@/services/productSefvice";
+import { Button } from "@/components/ui/button";
+import { productService } from "@/services/productService";
 import { AddProductModal } from "@/components/product/AddProductForm";
+import { EditProductModal } from "@/components/product/EditProductModal";
 
 const AdminProduct = () => {
     const [products, setProducts] = useState<Product[]>([]);
     const [loading, setLoading] = useState(true);
     const [pagination, setPagination] = useState<PaginationDTO | null>(null);
     const [currentPage, setCurrentPage] = useState(0);
-    const [isModalOpen, setIsModalOpen] = useState(false);
 
     const fetchProducts = async (page: number) => {
         setLoading(true);
@@ -38,58 +31,58 @@ const AdminProduct = () => {
     }, [currentPage]);
 
     return (
-        <div className="w-full space-y-4">
-            <div className="flex justify-between items-end">
+        <div className="w-full space-y-4 p-4">
+            <div className="flex justify-between items-center bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
                 <div>
-                    <h2 className="text-xl font-bold text-slate-800">Catalogue Actif</h2>
-                    <p className="text-sm text-slate-500">Liste des produits disponibles à la vente</p>
+                    <h2 className="text-2xl font-bold text-slate-800">Gestion des Produits</h2>
+                    <p className="text-sm text-slate-500">Consulter et modifier votre inventaire</p>
                 </div>
-
                 <AddProductModal onProductAdded={() => fetchProducts(currentPage)} />
             </div>
 
             <div className="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
                 {loading ? (
-                    <div className="flex flex-col items-center justify-center h-64 gap-2">
+                    <div className="flex flex-col items-center justify-center h-64 gap-2 text-slate-400">
                         <Loader2 className="animate-spin text-blue-500" size={32} />
-                        <span className="text-slate-500 text-sm">Récupération des données...</span>
+                        Chargement des produits...
                     </div>
                 ) : (
                     <div className="overflow-x-auto">
                         <table className="w-full text-left border-collapse">
-                            <thead>
-                                <tr className="bg-slate-50/80 border-b border-slate-200">
-                                    <th className="px-6 py-4 text-xs font-semibold text-slate-600 uppercase">Produit</th>
-                                    <th className="px-6 py-4 text-xs font-semibold text-slate-600 uppercase">Prix HT</th>
-                                    <th className="px-6 py-4 text-xs font-semibold text-slate-600 uppercase">TVA</th>
-                                    <th className="px-6 py-4 text-xs font-semibold text-slate-600 uppercase">Stock</th>
+                            <thead className="bg-slate-50 border-b border-slate-200">
+                                <tr>
+                                    <th className="px-6 py-4 text-xs font-bold uppercase text-slate-600">Désignation</th>
+                                    <th className="px-6 py-4 text-xs font-bold uppercase text-slate-600">Prix HT</th>
+                                    <th className="px-6 py-4 text-xs font-bold uppercase text-slate-600">Stock</th>
+                                    <th className="px-6 py-4 text-xs font-bold uppercase text-slate-600">TVA</th>
+                                    <th className="px-6 py-4 text-xs font-bold uppercase text-slate-600 text-right">Actions</th>
                                 </tr>
                             </thead>
-                            <tbody className="divide-y divide-slate-100">
+                            <tbody>
                                 {products.map((product) => (
-                                    <tr key={product.uuid} className="hover:bg-slate-50/50 transition-colors">
-                                        <td className="px-6 py-4">
-                                            <div className="flex items-center gap-3">
-                                                <Package className="text-slate-400" size={18} />
-                                                <span className="font-medium text-slate-700">{product.name}</span>
-                                            </div>
+                                    <tr key={product.uuid} className="hover:bg-slate-50 border-b last:border-0 transition-colors">
+                                        <td className="px-6 py-4 flex items-center gap-3">
+                                            <Package size={18} className="text-slate-400" />
+                                            <span className="font-bold text-slate-700">{product.name}</span>
+                                        </td>
+                                        <td className="px-6 py-4 font-bold text-slate-600">
+                                            {product.price.toFixed(2)} €
                                         </td>
                                         <td className="px-6 py-4">
-                                            <div className="flex items-center gap-1 text-slate-600">
-                                                <CircleDollarSign size={14} className="text-slate-400" />
-                                                <span>{product.price.toFixed(2)} €</span>
-                                            </div>
+                                            <span className={`px-2 py-1 rounded text-[10px] font-bold ${product.stock < 10 ? 'bg-orange-100 text-orange-600' : 'bg-green-100 text-green-600'}`}>
+                                                {product.stock} unités
+                                            </span>
                                         </td>
                                         <td className="px-6 py-4">
-                                            <span className="text-slate-500">{(product.prcTVA * 100).toFixed(0)}%</span>
+                                            <span className="px-2 py-1 rounded text-[10px] font-bold 'bg-green-100 text-red-600">
+                                                {product.prcTVA} %
+                                            </span>
                                         </td>
-                                        <td className="px-6 py-4">
-                                            <div className="flex items-center gap-2">
-                                                <Layers size={14} className={product.stock < 10 ? "text-orange-500" : "text-slate-400"} />
-                                                <span className={`text-sm font-medium ${product.stock < 10 ? "text-orange-600" : "text-slate-600"}`}>
-                                                    {product.stock} unités
-                                                </span>
-                                            </div>
+                                        <td className="px-6 py-4 text-right">
+                                            <EditProductModal 
+                                                product={product} 
+                                                onProductUpdated={() => fetchProducts(currentPage)} 
+                                            />
                                         </td>
                                     </tr>
                                 ))}
@@ -99,34 +92,29 @@ const AdminProduct = () => {
                 )}
 
                 {pagination && (
-                    <div className="px-6 py-4 bg-slate-50/50 border-t border-slate-200 flex items-center justify-between">
-                        <span className="text-sm text-slate-500">
-                            Affichage de <span className="font-semibold text-slate-700">{products.length}</span> produits
-                        </span>
-                        
-                        <div className="flex items-center gap-3">
-                            <button
-                                onClick={() => setCurrentPage(prev => prev - 1)}
+                    <div className="px-6 py-4 bg-slate-50 border-t flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                            <Button 
+                                variant="outline" 
+                                size="sm" 
+                                onClick={() => setCurrentPage(prev => prev - 1)} 
                                 disabled={pagination.isFirst || loading}
-                                className="p-2 rounded-md border border-slate-300 bg-white text-slate-600 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-sm"
-                                title="Page précédente"
                             >
-                                <ChevronLeft size={18} />
-                            </button>
-                            
-                            <span className="text-sm font-medium text-slate-700 bg-white border border-slate-300 px-3 py-1.5 rounded-md shadow-sm">
+                                <ChevronLeft size={16} />
+                            </Button>
+                            <span className="text-xs font-bold">
                                 {pagination.page + 1} / {pagination.totalPages}
                             </span>
-                            
-                            <button
-                                onClick={() => setCurrentPage(prev => prev + 1)}
+                            <Button 
+                                variant="outline" 
+                                size="sm" 
+                                onClick={() => setCurrentPage(prev => prev + 1)} 
                                 disabled={pagination.isLast || loading}
-                                className="p-2 rounded-md border border-slate-300 bg-white text-slate-600 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-sm"
-                                title="Page suivante"
                             >
-                                <ChevronRight size={18} />
-                            </button>
+                                <ChevronRight size={16} />
+                            </Button>
                         </div>
+                        <span className="text-xs font-medium text-slate-400">Total: {pagination.totalElements} produits</span>
                     </div>
                 )}
             </div>

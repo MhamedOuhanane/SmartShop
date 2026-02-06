@@ -1,8 +1,8 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
-import { Loader2, PackagePlus, AlertCircle, Plus } from "lucide-react";
+import { Loader2, Edit3, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
 import { productService } from "@/services/productService";
 import {
@@ -16,6 +16,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import type { Product } from "@/type/ProductType";
 
 const productSchema = yup.object({
     name: yup.string()
@@ -40,11 +41,12 @@ const productSchema = yup.object({
 
 type ProductFormData = yup.InferType<typeof productSchema>;
 
-interface AddProductModalProps {
-    onProductAdded: () => void;
+interface EditProductModalProps {
+    product: Product;
+    onProductUpdated: () => void;
 }
 
-export function AddProductModal({ onProductAdded }: AddProductModalProps) {
+export function EditProductModal({ product, onProductUpdated }: EditProductModalProps) {
     const [open, setOpen] = useState(false);
 
     const {
@@ -55,22 +57,32 @@ export function AddProductModal({ onProductAdded }: AddProductModalProps) {
     } = useForm<ProductFormData>({
         resolver: yupResolver(productSchema),
         defaultValues: {
-            name: "",
-            price: 0,
-            stock: 0,
-            prcTVA: 0.20
+            name: product.name,
+            price: product.price,
+            stock: product.stock,
+            prcTVA: product.prcTVA
         }
     });
 
+    useEffect(() => {
+        if (open) {
+            reset({
+                name: product.name,
+                price: product.price,
+                stock: product.stock,
+                prcTVA: product.prcTVA
+            });
+        }
+    }, [open, product, reset]);
+
     const onSubmit = async (data: ProductFormData) => {
         try {
-            await productService.create(data);
-            toast.success("Produit créé avec succès");
-            reset();
+            await productService.update(product.uuid, data);
+            toast.success("Produit mis à jour avec succès");
             setOpen(false);
-            onProductAdded();
+            onProductUpdated();
         } catch (error) {
-            const message = error instanceof Error ? error.message : "Erreur lors de la création";
+            const message = error instanceof Error ? error.message : "Erreur lors de la modification";
             toast.error(message);
         }
     };
@@ -78,24 +90,24 @@ export function AddProductModal({ onProductAdded }: AddProductModalProps) {
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
-                <Button className="bg-blue-600 hover:bg-blue-700 text-white flex gap-2">
-                    <Plus size={18} /> Nouveau Produit
+                <Button variant="ghost" size="icon" className="text-blue-600 hover:text-blue-800 hover:bg-blue-50">
+                    <Edit3 size={18} />
                 </Button>
             </DialogTrigger>
 
             <DialogContent className="sm:max-w-[450px]">
                 <DialogHeader>
                     <DialogTitle className="flex items-center gap-2 text-blue-600">
-                        <PackagePlus size={24} />
-                        <span className="text-xl font-bold">Ajouter un nouveau produit</span>
+                        <Edit3 size={24} />
+                        <span className="text-xl font-bold">Modifier le produit</span>
                     </DialogTitle>
                 </DialogHeader>
 
                 <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 py-4">
                     <div className="space-y-1">
-                        <Label htmlFor="name">Nom du produit</Label>
+                        <Label htmlFor="edit-name">Nom du produit</Label>
                         <Input
-                            id="name"
+                            id="edit-name"
                             {...register("name")}
                             className={errors.name ? "border-red-500" : "border-slate-300"}
                         />
@@ -108,9 +120,9 @@ export function AddProductModal({ onProductAdded }: AddProductModalProps) {
 
                     <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-1">
-                            <Label htmlFor="price">Prix HT</Label>
+                            <Label htmlFor="edit-price">Prix HT</Label>
                             <Input
-                                id="price"
+                                id="edit-price"
                                 type="number"
                                 step="0.01"
                                 {...register("price")}
@@ -120,9 +132,9 @@ export function AddProductModal({ onProductAdded }: AddProductModalProps) {
                         </div>
 
                         <div className="space-y-1">
-                            <Label htmlFor="stock">Stock</Label>
+                            <Label htmlFor="edit-stock">Stock</Label>
                             <Input
-                                id="stock"
+                                id="edit-stock"
                                 type="number"
                                 {...register("stock")}
                                 className={errors.stock ? "border-red-500" : "border-slate-300"}
@@ -132,9 +144,9 @@ export function AddProductModal({ onProductAdded }: AddProductModalProps) {
                     </div>
 
                     <div className="space-y-1">
-                        <Label htmlFor="prcTVA">TVA (Taux)</Label>
+                        <Label htmlFor="edit-prcTVA">TVA (Taux)</Label>
                         <select
-                            id="prcTVA"
+                            id="edit-prcTVA"
                             {...register("prcTVA")}
                             className="w-full h-10 px-3 py-2 border border-slate-300 rounded-lg bg-white outline-none focus:border-blue-500 transition-all text-sm"
                         >
@@ -159,7 +171,7 @@ export function AddProductModal({ onProductAdded }: AddProductModalProps) {
                             disabled={isSubmitting}
                             className="flex-[2] bg-blue-600 hover:bg-blue-700 text-white"
                         >
-                            {isSubmitting ? <Loader2 className="animate-spin" size={18} /> : "Enregistrer"}
+                            {isSubmitting ? <Loader2 className="animate-spin" size={18} /> : "Enregistrer les modifications"}
                         </Button>
                     </DialogFooter>
                 </form>
