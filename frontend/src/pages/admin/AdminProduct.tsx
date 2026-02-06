@@ -5,17 +5,20 @@ import {
     ChevronRight, 
     Package,
     CircleDollarSign,
-    Layers
+    Layers,
+    Plus
 } from "lucide-react";
 import type { Product } from "@/type/ProductType";
 import type { PaginationDTO } from "@/type/ApiResponse";
 import { productService } from "@/services/productSefvice";
+import { AddProductModal } from "@/components/product/AddProductForm";
 
 const AdminProduct = () => {
     const [products, setProducts] = useState<Product[]>([]);
     const [loading, setLoading] = useState(true);
     const [pagination, setPagination] = useState<PaginationDTO | null>(null);
     const [currentPage, setCurrentPage] = useState(0);
+    const [isModalOpen, setIsModalOpen] = useState(false);
 
     const fetchProducts = async (page: number) => {
         setLoading(true);
@@ -41,6 +44,8 @@ const AdminProduct = () => {
                     <h2 className="text-xl font-bold text-slate-800">Catalogue Actif</h2>
                     <p className="text-sm text-slate-500">Liste des produits disponibles à la vente</p>
                 </div>
+
+                <AddProductModal onProductAdded={() => fetchProducts(currentPage)} />
             </div>
 
             <div className="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">

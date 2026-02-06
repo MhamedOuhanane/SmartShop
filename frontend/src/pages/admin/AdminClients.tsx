@@ -23,7 +23,6 @@ const AdminClients = () => {
 
     const [selectedClient, setSelectedClient] = useState<Client | null>(null);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-    console.log(pagination);
     
 
     const fetchClients = async (page: number) => {
