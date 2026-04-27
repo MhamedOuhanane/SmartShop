@@ -1,6 +1,7 @@
 package com.smartshop.smartshop.controller;
 
 import com.smartshop.smartshop.model.dto.LoginDto;
+import com.smartshop.smartshop.model.dto.RegisterDto;
 import com.smartshop.smartshop.model.dto.UserDTO;
 import com.smartshop.smartshop.service.interfaces.UserService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -60,6 +61,16 @@ public class AuthController {
         session.setAttribute("user_role", user.getRole());
 
         return ResponseEntity.status(result.getStatus()).body(result);
+    }
+
+    @PostMapping("/register")
+    public ResponseEntity<?> register(
+            @Valid @RequestBody RegisterDto dto,
+            HttpServletRequest request
+    ) {
+        var result = userService.register(dto);
+        result.setPath(request.getRequestURI());
+         return ResponseEntity.status(201).body(result);
     }
 
 
